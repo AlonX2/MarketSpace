@@ -2,8 +2,6 @@ from pinecone import Pinecone
 from openai import OpenAI
 import numpy as np
 
-
-
 PINECONE_API_KEY = "e4d3c997-d68d-4f03-a42a-6c60c6dd9b02"
 OPENAI_API_KEY = "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"
 RES_FILE = "out.txt"
