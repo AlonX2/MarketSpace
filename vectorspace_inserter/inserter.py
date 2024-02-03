@@ -37,7 +37,7 @@ class VectorspaceInserter():
 
         self.features[feature_type].append(vector)
 
-        logger.debug(f"Registered feature embedding with id {feature_id}.")
+        logger.debug(f"Registered feature embedding with id {feature_id} and feature type '{feature_type}'.")
     
     def _add_product_features(self, product: Product):
         """
