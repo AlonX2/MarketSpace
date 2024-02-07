@@ -74,7 +74,7 @@ class VectorspaceInserter():
         for product in products:
             self._add_product_features(product)
             
-            longest_feature_list = max(self.features.values(), key=lambda val: len(val))
+            longest_feature_list = max(self.features.values(), key=len)
             if len(longest_feature_list) > self.driver.RECOMMENDED_BATCH_SIZE:
                 self._insert_features()
 
