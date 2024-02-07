@@ -3,7 +3,7 @@ from ._drivers import OpenaiPineconeDriver
 
 def _setup_logger():
     """
-    Setups logging for thhe vectorspace_driver package.
+    Setups logging for the vectorspace_driver package.
     """
     
     import logging
