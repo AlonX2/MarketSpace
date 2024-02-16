@@ -12,7 +12,6 @@ class FeatureResolver:
         The key of each template should be the name of the feature.
         The template itself should be injectable by `Product` instances.
         """
-        
         self._llm_client = llm_client
         self._feature_prompt_templates = feature_prompt_templates
 
