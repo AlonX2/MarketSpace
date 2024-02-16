@@ -5,6 +5,7 @@ from openai import OpenAI
 
 from vectorspace_inserter._drivers import IVectorspaceDriver, DriverError
 from ._config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_INDEX_NAME, BATCH_SIZE
+from utils.logging import format_logged_substring
 
 logger =  logging.getLogger(__package__)
 
@@ -26,7 +27,7 @@ class OpenaiPineconeDriver(IVectorspaceDriver):
         :returns: A numpy array for the generated vector embedding.
         """
 
-        logger.debug(f"Generating embedding for text: '{text[:30]}...', with model '{model}'...")
+        logger.debug(f"Generating embedding for text: {format_logged_substring(text)}, with model {format_logged_substring(model)}")
 
         try:
             embedding = self.openai_client.embeddings.create(input=[text], model=model).data[0].embedding
