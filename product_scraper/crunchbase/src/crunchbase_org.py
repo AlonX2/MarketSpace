@@ -31,7 +31,7 @@ class CrunchbaseOrganization():
         resp = requests.get(f"https://api.crunchbase.com/api/v4/entities/organizations/{uuid}", params={"user_key": api_key}, json=query)
         return resp.content
 
-    def to_json(self):
+    def json(self):
         dict_values =  {
             "name": self._name,
             "uuid": self._uuid,
