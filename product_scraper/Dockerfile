@@ -4,8 +4,13 @@ WORKDIR /scraper
 
 ARG type
 
-RUN pip install -r $type/requirements.txt
+COPY product_scraper/$type/requirements.txt /requirements.txt
 
-COPY $type/src/ src/
+RUN pip install -r /requirements.txt
+
+COPY product_scraper/$type/src/ src/
+COPY utils/ utils/
+
+ENV PYTHONPATH "${PYTHONPATH}:/scraper"
 
 ENTRYPOINT ["python", "src/run_scraper.py"]

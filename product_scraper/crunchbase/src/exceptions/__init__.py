@@ -1,2 +1,2 @@
-from .query_exception import CrunchbaseQueryException
-from .scrape_exception import ScrapeException
+from .query_exception import CrunchbaseQueryError
+from .scrape_exception import ScrapeError

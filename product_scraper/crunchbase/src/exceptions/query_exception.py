@@ -1,2 +1,2 @@
-class CrunchbaseQueryException(Exception):
+class CrunchbaseQueryError(Exception):
     pass

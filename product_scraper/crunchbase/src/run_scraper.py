@@ -1,13 +1,14 @@
 import pika
 
-from product_scraper.crunchbase.src.crunchbase_org import CrunchbaseOrganization
-from product_scraper.crunchbase.src.crunchbase_query import CrunchbaseSearchQuery
-from product_scraper.crunchbase.src.exceptions import ScrapeException
+from src.crunchbase_org import CrunchbaseOrganization
+from src.crunchbase_query import CrunchbaseSearchQuery
+from src.exceptions import ScrapeError
 from utils import get_env_vars
 
 def send_to_rabbit(content):
     host, exchange, routing_key = get_env_vars(["RABBIT_HOST", "RABBIT_EXCHANGE", "RABBIT_ROUTING_KEY"], 
                                                required=True)
+    
     with pika.BlockingConnection(pika.ConnectionParameters(host=host)) as conn:
         channel = conn.channel()
         channel.basic_publish(exchange=exchange,
@@ -33,7 +34,7 @@ def run_scraper():
     start_date, end_date = get_env_vars(["START_DATE", "END_DATE"])
 
     if org_categories is None:
-        raise ScrapeException("Missing required environment variable 'CATEGORIES'.")
+        raise ScrapeError("Missing required environment variable 'CATEGORIES'.")
     
     orgs =  get_top_orgs_by_categories(org_categories, start_date, end_date)
     for org_info in orgs:

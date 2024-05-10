@@ -1,5 +1,7 @@
 import requests, json, os
 
+from src.exceptions import CrunchbaseQueryError
+
 class CrunchbaseOrganization():
     required_fields = ["name", "uuid", "website_url"]
 
@@ -20,7 +22,7 @@ class CrunchbaseOrganization():
             if query_for_missing_info and "uuid" in org_fields:
                 return cls.create_from_uuid(org_fields["uuid"])
             else:
-                raise Exception("Missing fields in organization info, cannot initialize organization object.")
+                raise CrunchbaseQueryError("Missing uuid field in organization info, cannot initialize organization object.")
             
         return cls(org_fields["name"], org_fields["uuid"], org_fields["website_url"])
 
