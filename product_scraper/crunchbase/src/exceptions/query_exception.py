@@ -1,2 +1,0 @@
-class CrunchbaseQueryError(Exception):
-    pass
