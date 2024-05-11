@@ -8,7 +8,7 @@ from crunchbase.src.crunchbase_query import CrunchbaseSearchQuery, CrunchbaseQue
 @pytest.fixture()
 def crunchbase_search_query_fixture():
     url = "test/url"
-    fields = ["testfield1", "testfield2"]
+    fields = ["f1", "f2"]
     return CrunchbaseSearchQuery(url, fields)
 
 def test_noSortingDefined_defineSorting_addSortingToQuery(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
@@ -51,7 +51,7 @@ def test_onePageResult_execute_returnEntities(crunchbase_search_query_fixture: C
 
         get_env_mock.assert_called_once()
         ensure_query_mock.assert_called_once()
-        requests_post_mock.assert_called_once_with("test/url", params={"user_key": "API_KEY"}, json={"field_ids": ["testfield1", "testfield2"], "limit": 500})
+        requests_post_mock.assert_called_once_with("test/url", params={"user_key": "API_KEY"}, json={"field_ids": ["f1", "f2"], "limit": 500})
         
 def test_twoPageResult_execute_returnEntities(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
     with (patch("requests.post") as requests_post_mock,
@@ -70,7 +70,7 @@ def test_twoPageResult_execute_returnEntities(crunchbase_search_query_fixture: C
         ensure_query_mock.assert_called_once()
 
         assert requests_post_mock.call_count == 2
-        requests_post_mock.assert_called_with("test/url", params={"user_key": "API_KEY"}, json={"field_ids": ["testfield1", "testfield2"], "limit": 2, "after_id": 2})
+        requests_post_mock.assert_called_with("test/url", params={"user_key": "API_KEY"}, json={"field_ids": ["f1", "f2"], "limit": 2, "after_id": 2})
 
 def test_error_execute_queryError(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
     with (patch("requests.post") as requests_post_mock,
