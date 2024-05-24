@@ -23,4 +23,3 @@ def get_env_vars(env_var_names: list[str], required: bool = False) -> list[str]:
         values.append(os.getenv(var))
     
     return values
-        

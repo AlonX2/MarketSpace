@@ -29,7 +29,7 @@ def test_filterInfo_addFilter_addQueryFieldToQuery(crunchbase_search_query_fixtu
                                                                   "operator_id": "op",
                                                                   "values": ["val"]}  
 
-def test_filterAlreadyExists_addFilter_addQueryFieldToQuery(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
+def test_filterAlreadyExists_addFilter_addQueryField(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
     crunchbase_search_query_fixture.add_filter("testfield", "op", "val")
     crunchbase_search_query_fixture.add_filter("testfield2", "op2", "val2")
     assert len(crunchbase_search_query_fixture._query["query"]) == 2
@@ -39,19 +39,18 @@ def test_filterAlreadyExists_addFilter_addQueryFieldToQuery(crunchbase_search_qu
                                                                   "values": ["val2"]}  
     
 def test_onePageResult_execute_returnEntities(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
-    with (patch("requests.post") as requests_post_mock,
+    with (patch("crunchbase.src.crunchbase_query.CrunchbaseSearchQuery._perform_request") as perform_request_mock,
           patch("crunchbase.src.crunchbase_query.CrunchbaseSearchQuery._ensure_query_integrity") as ensure_query_mock,
           patch("crunchbase.src.crunchbase_query.get_env_vars") as get_env_mock):
         
-        requests_post_mock.return_value.json.return_value = {"entities": ["e1", "e2", "e3"]}
-        requests_post_mock.return_value.status_code = 200
+        perform_request_mock.return_value = {"entities": ["e1", "e2", "e3"]}
         get_env_mock.return_value = ["API_KEY"]
 
         assert crunchbase_search_query_fixture.execute() == ["e1", "e2", "e3"]
 
         get_env_mock.assert_called_once()
         ensure_query_mock.assert_called_once()
-        requests_post_mock.assert_called_once_with("test/url", params={"user_key": "API_KEY"}, json={"field_ids": ["f1", "f2"], "limit": 500})
+        perform_request_mock.assert_called_once_with("API_KEY", {"field_ids": ["f1", "f2"], "limit": 500})
         
 def test_twoPageResult_execute_returnEntities(crunchbase_search_query_fixture: CrunchbaseSearchQuery):
     with (patch("requests.post") as requests_post_mock,

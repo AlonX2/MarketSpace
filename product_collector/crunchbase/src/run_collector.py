@@ -2,7 +2,7 @@ import pika
 
 from src.crunchbase_org import CrunchbaseOrganization
 from src.crunchbase_query import CrunchbaseSearchQuery
-from src.exceptions import ScrapeError
+from src.config import CRUNCHBASE_API_ENDPOINT
 from utils import get_env_vars
 
 def send_to_rabbit(content: str):
@@ -31,7 +31,7 @@ def get_orgs_by_categories(categories: list[str], start_date: str = None, end_da
     :returns: List of org info dicts, for all organizations found. Refer to the crunchbase API docs for info on the dict format.
     """
 
-    query_url = "https://api.crunchbase.com/api/v4/searches/organizations"
+    query_url = f"{CRUNCHBASE_API_ENDPOINT}/searches/organizations"
     query = CrunchbaseSearchQuery(query_url, requested_fields=CrunchbaseOrganization.required_fields)
 
     query.add_filter("categories", "Includes", categories)
@@ -52,9 +52,6 @@ def collect():
 
     org_categories, = get_env_vars(["CATEGORIES"], required=True)
     start_date, end_date = get_env_vars(["START_DATE", "END_DATE"])
-
-    if org_categories is None:
-        raise ScrapeError("Missing required environment variable 'CATEGORIES'.")
     
     orgs =  get_orgs_by_categories(org_categories, start_date, end_date)
     for org_info in orgs:

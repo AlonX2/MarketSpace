@@ -3,9 +3,15 @@ from __future__ import annotations
 import requests, json, os
 
 from src.exceptions import CrunchbaseQueryError
+from src.config import CRUNCHBASE_API_ENDPOINT
 
 class CrunchbaseOrganization():
-    required_fields = ["name", "uuid", "website_url"]
+    """
+    A class that encapsulates data received from crunchbase about a company.
+    Supports getting additional info from crunchbase about the org.
+    """
+
+    required_fields = ["name", "uuid", "website_url"] # the fields required to construct a CrunchbaseOrganization object.
 
     def __init__(self, name, uuid, url):
         self.name = name
@@ -53,7 +59,7 @@ class CrunchbaseOrganization():
         """
         api_key = os.getenv("CRUNCHBASE_API_KEY")
         query = {"field_ids": cls.required_fields, "card_ids": []}
-        resp = requests.get(f"https://api.crunchbase.com/api/v4/entities/organizations/{uuid}", params={"user_key": api_key}, json=query)
+        resp = requests.get(f"{CRUNCHBASE_API_ENDPOINT}/entities/organizations/{uuid}", params={"user_key": api_key}, json=query)
         return resp.content
 
     def json(self) -> str:
