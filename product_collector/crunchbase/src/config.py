@@ -1,0 +1,1 @@
+CRUNCHBASE_API_ENDPOINT = "https://api.crunchbase.com/api/v4"
