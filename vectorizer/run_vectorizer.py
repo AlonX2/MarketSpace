@@ -5,7 +5,7 @@ from vectorizer._drivers import OpenaiPineconeDriver
 from vectorizer.inserter import Inserter
 from vectorizer.feature import ProductFeature
 from vectorizer.config import EMPTY_QUEUE_SLEEP_TIME
-from product.product import Product
+from utils.product import Product
 from utils import get_env_vars
 from utils.rabbit import RabbitClient, NoMessagesFoundException
 

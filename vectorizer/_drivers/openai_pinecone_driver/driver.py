@@ -3,7 +3,7 @@ import logging, numpy as np
 from pinecone import Pinecone
 from openai import OpenAI
 
-from vectorspace_inserter._drivers import IVectorspaceDriver, DriverError
+from vectorizer._drivers import IVectorspaceDriver, DriverError
 from ._config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_INDEX_NAME, BATCH_SIZE
 from utils.logging import format_logged_substring
 
