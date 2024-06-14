@@ -1,4 +1,4 @@
-from .inserter import Inserter
+from .inserter import VectorspaceInserter
 from ._drivers import OpenaiPineconeDriver
 
 def _setup_logger():
