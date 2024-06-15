@@ -3,11 +3,11 @@ import logging, numpy as np
 from pinecone import Pinecone
 from openai import OpenAI
 
-from vectorizer._drivers import IVectorspaceDriver, DriverError
+from src._drivers import IVectorspaceDriver, DriverError
 from ._config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_INDEX_NAME, BATCH_SIZE
 from utils.logging import format_logged_substring
 
-logger =  logging.getLogger(__package__)
+logger = logging.getLogger(__package__)
 
 class OpenaiPineconeDriver(IVectorspaceDriver):
     RECOMMENDED_BATCH_SIZE = BATCH_SIZE
