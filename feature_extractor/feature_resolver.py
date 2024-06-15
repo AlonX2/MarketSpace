@@ -1,4 +1,4 @@
-from product.product import Product
+from utils.product import Product
 from .clients.interface import ILLMClient
 
 class FeatureResolver:

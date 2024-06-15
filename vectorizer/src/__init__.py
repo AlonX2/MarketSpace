@@ -1,6 +1,3 @@
-from .inserter import Inserter
-from ._drivers import OpenaiPineconeDriver
-
 def _setup_logger():
     """
     Setups logging for the vectorspace_driver package.

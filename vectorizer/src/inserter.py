@@ -1,11 +1,7 @@
-import hashlib, logging
-from pika import PlainCredentials
+import logging
 
-from vectorizer._drivers import IVectorspaceDriver, DriverError
-from vectorizer.feature import ProductFeature
-from product.product import Product
-from utils import get_env_vars
-from utils.rabbit import RabbitClient
+from src._drivers import IVectorspaceDriver, DriverError
+from src.feature import ProductFeature
 
 logger = logging.getLogger(__package__)
 

@@ -1,13 +1,12 @@
-import hashlib, logging, json, time
-from pika import PlainCredentials
+import logging, json, time
 
-from vectorizer._drivers import OpenaiPineconeDriver
-from vectorizer.inserter import Inserter
-from vectorizer.feature import ProductFeature
-from vectorizer.config import EMPTY_QUEUE_SLEEP_TIME
-from product.product import Product
+from src._drivers import OpenaiPineconeDriver
+from src.inserter import Inserter
+from src.feature import ProductFeature
+from src.config import EMPTY_QUEUE_SLEEP_TIME
 from utils import get_env_vars
 from utils.rabbit import RabbitClient, NoMessagesFoundException
+from utils.product import Product
 
 logger =  logging.getLogger(__package__)
 
