@@ -3,7 +3,7 @@ from pika import PlainCredentials
 
 from vectorizer._drivers import IVectorspaceDriver, DriverError
 from vectorizer.feature import ProductFeature
-from product.product import Product
+from utils.product import Product
 from utils import get_env_vars
 from utils.rabbit import RabbitClient
 
