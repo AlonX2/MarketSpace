@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class ProductRoutingInfo():
@@ -13,8 +13,8 @@ class Product:
     uid: str
     name: str
     url: str
-    features: dict[str, str] = {}
     routing_info: ProductRoutingInfo
+    features: dict[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_json(cls, json_data: str):

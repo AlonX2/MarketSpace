@@ -1,9 +1,6 @@
 import pika
 from utils import get_env_vars
 
-RABBIT_HOST, RABBIT_EXCHANGE, RABIIT_ROUTING_KEY = get_env_vars(["RABBIT_HOST", "RABBIT_EXCHANGE", "RABBIT_ROUTING_KEY"], 
-                                                                required=True)
-
 class RabbitClientException(Exception):
     pass
 
