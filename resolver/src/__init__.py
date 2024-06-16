@@ -1,5 +1,5 @@
 from .feature_resolver import FeatureResolver
-from .clients import *
+from src.clients import *
 
 def _setup_logger():
     """
