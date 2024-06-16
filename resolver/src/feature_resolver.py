@@ -1,5 +1,5 @@
 from utils.product import Product
-from .clients.interface import ILLMClient
+from src.clients.interface import ILLMClient
 
 class FeatureResolver:
     def __init__(self, llm_client: ILLMClient, feature_prompt_templates: dict[str, str]) -> None:

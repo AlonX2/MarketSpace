@@ -1,6 +1,6 @@
 import pika
 from utils import get_env_vars
-
+    
 class RabbitClientException(Exception):
     pass
 
@@ -27,7 +27,8 @@ class RabbitClient():
             channel.basic_publish(exchange=exchange,
                                 routing_key=routing_key,
                                 body=content,
-                                properties=props)    
+                                properties=props,
+                                mandatory=True)    
 
     def consume(self, queue):
         with pika.BlockingConnection(self.connection_params) as conn:
@@ -37,3 +38,24 @@ class RabbitClient():
             if get_ok is None:
                 raise NoMessagesFoundException("No messages in queue")
             return props, msg  
+        
+    def async_consume(self, queue, callback):
+        with pika.BlockingConnection(self.connection_params) as conn:
+            channel = conn.channel()
+            channel.queue_declare(queue=queue)
+            channel.basic_consume(queue=queue,
+                                  on_message_callback=callback,
+                                  auto_ack=True)
+        
+    @classmethod
+    def get_default_client(cls, **extra_args):
+        """
+        Builds a default RabbitClient by the standard environment variables.
+        """
+        rabbit_username, rabbit_password, rabbit_host, rabbit_port = get_env_vars(["RABBIT_USERNAME",
+                                                                                    "RABBIT_PASSWORD",
+                                                                                    "RABBIT_HOST",
+                                                                                    "RABBIT_PORT"],
+                                                                                    required=True)
+        
+        return cls(username=rabbit_username, password=rabbit_password, host=rabbit_host, port=rabbit_port, **extra_args)

@@ -35,14 +35,8 @@ def send_features_to_rabbit(rabbit_client: RabbitClient, product: Product):
         rabbit_client.publish(exchange, product.routing_info.target_queue, feature_json, correlation_id=product.routing_info.corr_id)
 
 def main():
-    rabbit_username, rabbit_password, rabbit_host, rabbit_port, rabbit_input_queue = get_env_vars(["RABBIT_USERNAME",
-                                                                                                   "RABBIT_PASSWORD",
-                                                                                                   "RABBIT_HOST",
-                                                                                                   "RABBIT_PORT",
-                                                                                                   "RABBIT_INPUT_QUEUE"],
-                                                                                                   required=True)
-    
-    rabbit_client = RabbitClient(username=rabbit_username, password=rabbit_password, host=rabbit_host, port=rabbit_port)
+    rabbit_input_queue = get_env_vars(["RABBIT_INPUT_QUEUE"], required=True)
+    rabbit_client = RabbitClient.get_default_client()
 
     while True:
         logger.info(f"looking for message in queue {rabbit_input_queue}...")
