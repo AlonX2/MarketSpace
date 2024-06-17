@@ -1,16 +1,14 @@
 FROM python:3.12-slim
 
-WORKDIR /extractor
+WORKDIR /resolver
 
-ARG type
-
-COPY extractor/requirements.txt /requirements.txt
+COPY resolver/requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
 
-COPY extractor/src/ src/
+COPY resolver/src/ src/
 COPY utils/ utils/
 
-ENV PYTHONPATH "${PYTHONPATH}:/collector"
+ENV PYTHONPATH "${PYTHONPATH}:/resolver"
 
-ENTRYPOINT ["python", "src/run_collector.py"]
+ENTRYPOINT ["python", "src/run_resolver.py"]
