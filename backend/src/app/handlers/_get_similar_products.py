@@ -3,7 +3,7 @@ import json, logging
 from flask import current_app
 
 from db_client import IDbClient, DbClientException
-from app.microservice_client import MicroserviceClient, MicroserviceClientException
+from src.app.microservice_client import MicroserviceClient, MicroserviceClientException
 
 logger = logging.getLogger(__package__)
 

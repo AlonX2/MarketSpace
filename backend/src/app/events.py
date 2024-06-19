@@ -3,9 +3,9 @@ import pydantic, logging
 from flask import request
 from flask_socketio import emit
 
-from app.extensions import socketio
-from app.handlers import get_similar_products, GetSimilarProductsException
-from app.validation_models.product_description import ProductDescription
+from src.app.extensions import socketio
+from src.app.handlers import get_similar_products, GetSimilarProductsException
+from src.app.validation_models.product_description import ProductDescription
 
 logger = logging.getLogger(__package__)
 
