@@ -3,7 +3,7 @@ sys.path.extend([".", "../."])
 
 from unittest.mock import patch, MagicMock
 
-from app.microservice_client.microservice_client import MicroserviceClient
+from src.app.microservice_client.microservice_client import MicroserviceClient
 
 @pytest.fixture
 def microservice_client_fixture():

@@ -5,8 +5,8 @@ from flask import Flask
 from flask_socketio.test_client import SocketIOTestClient
 from unittest.mock import patch, MagicMock
 
-from app.events import socketio
-from backend.app.events import GetSimilarProductsException
+from src.app.events import socketio
+from src.app.events import GetSimilarProductsException
 
 @pytest.fixture
 def socketio_client_fixture():
