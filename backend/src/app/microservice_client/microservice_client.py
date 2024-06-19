@@ -3,8 +3,8 @@ import pika, pika.exceptions, uuid, logging
 from typing import Callable
 
 from utils.call_future import CallFuture
-from backend.app.microservice_client._config import *
-from app.microservice_client.exceptions import *
+from ._config import *
+from .exceptions import *
 
 logger = logging.getLogger(__package__)
 
