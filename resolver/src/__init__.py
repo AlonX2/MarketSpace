@@ -1,6 +1,3 @@
-from .feature_resolver import FeatureResolver
-from src.clients import *
-
 def _setup_logger():
     """
     Setups logging for the vectorspace_driver package.

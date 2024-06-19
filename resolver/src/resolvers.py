@@ -1,8 +1,8 @@
-import logging, json, uuid, pydantic
+import logging, json, uuid
 
-from product.product import Product
-from .clients import ILLMClient
-from ._config import *
+from utils.product import Product
+from .clients.interface import ILLMClient
+from ._templates import *
 
 logger = logging.getLogger(__package__)
 
@@ -17,12 +17,14 @@ class ResolveCompanyProductsError(Exception):
 def resolve_company_products(llm_client: ILLMClient, company_url: str) -> list[Product]:
     prompt = COMPANY_PRODUCTS_PROMPT.format(company_url=company_url)
     response = llm_client.get_response(prompt)
+
     try:
         products_dict = json.loads(response)
     except json.JSONDecodeError as e:
         msg = f"Couldn't resolve products of company: {company_url}\nLLM client returned invalid Json."
         logger.error(msg)
         raise ResolveCompanyProductsError(msg) from e
+    
     try:
         return [Product(uuid.uuid4(), name=products_dict["product_name"], url=products_dict["product_url"])]
     except KeyError as e:
