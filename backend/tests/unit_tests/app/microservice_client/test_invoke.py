@@ -2,8 +2,8 @@ import pytest, threading, pytest, pika, pika.exceptions
 
 from unittest.mock import patch, MagicMock
 
-from app.microservice_client.exceptions import MicroserviceClientException, MicroserviceFailed
-from app.microservice_client.microservice_client import MicroserviceClient
+from src.app.microservice_client.exceptions import MicroserviceClientException, MicroserviceFailed
+from src.app.microservice_client.microservice_client import MicroserviceClient
 
 
 @pytest.fixture

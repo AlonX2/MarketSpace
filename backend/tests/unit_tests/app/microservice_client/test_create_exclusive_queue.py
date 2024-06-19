@@ -1,4 +1,4 @@
-from app.microservice_client import MicroserviceClient
+from src.app.microservice_client import MicroserviceClient
 
 def test_calling_createExclusiveQueue_returnNewQueueName(microservice_client_fixture: MicroserviceClient):
     microservice_client_fixture._channel.queue_declare.return_value.method.queue = 'test_queue'
