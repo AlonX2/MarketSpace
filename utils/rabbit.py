@@ -57,24 +57,25 @@ class RabbitClient():
                                 properties=props,
                                 mandatory=True)    
 
+    def create_exclusive_queue(self):
+        return self.channel.queue_declare(queue="", exclusive=True).method.queue
+
     def consume(self, queue):
         if self.connection.is_closed():
             raise RabbitClientException("Connection to Rabbit is closed, cannot consume")
-        result = self.channel.queue_declare(queue=queue)
+        self.channel.queue_declare(queue=queue)
         get_ok, props, msg = self.channel.basic_get(queue=queue, auto_ack=True)
         if get_ok is None:
             raise NoMessagesFoundException("No messages in queue")
-        return props, msg, result.method.queue if queue == "" else None
+        return props, msg
         
     def async_consume(self, queue, callback) -> None | str:
         if self.connection.is_closed():
             raise RabbitClientException("Connection to Rabbit is closed, cannot async consume")
-        result = self.channel.queue_declare(queue=queue)
+        self.channel.queue_declare(queue=queue)
         self.channel.basic_consume(queue=queue,
                                 on_message_callback=callback,
                                 auto_ack=True)
-        if queue == "":
-            return result.method.queue
         
     @classmethod
     def get_default_client(cls, **extra_args):
