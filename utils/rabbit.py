@@ -31,21 +31,20 @@ class RabbitClient():
         self.channel = self.connection.channel()
         self.channel.confirm_delivery()
         logger.info("Created channel to RabbitMQ exchange server")
-
-    def close_connection(self):
-        connection: pika.channel.Channel | None = getattr(self, "connection", None)
-        if connection is not None:
-            connection.close()
+     
+    @classmethod
+    def get_default_client(cls, **extra_args):
+        """
+        Builds a default RabbitClient by the standard environment variables.
+        """
+        rabbit_username, rabbit_password, rabbit_host, rabbit_port = get_env_vars(["RABBIT_USERNAME",
+                                                                                    "RABBIT_PASSWORD",
+                                                                                    "RABBIT_HOST",
+                                                                                    "RABBIT_PORT"],
+                                                                                    required=True)
+        
+        return cls(username=rabbit_username, password=rabbit_password, host=rabbit_host, port=rabbit_port, **extra_args)
     
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, **_):
-        self.close_connection()
-
-    def __del__(self):
-        self.close_connection()
-
     def publish(self, exchange, routing_key, content, **kwargs):
         if self.connection.is_closed():
             raise RabbitClientException("Connection to Rabbit is closed, cannot publish")
@@ -77,15 +76,16 @@ class RabbitClient():
                                 on_message_callback=callback,
                                 auto_ack=True)
         
-    @classmethod
-    def get_default_client(cls, **extra_args):
-        """
-        Builds a default RabbitClient by the standard environment variables.
-        """
-        rabbit_username, rabbit_password, rabbit_host, rabbit_port = get_env_vars(["RABBIT_USERNAME",
-                                                                                    "RABBIT_PASSWORD",
-                                                                                    "RABBIT_HOST",
-                                                                                    "RABBIT_PORT"],
-                                                                                    required=True)
-        
-        return cls(username=rabbit_username, password=rabbit_password, host=rabbit_host, port=rabbit_port, **extra_args)
+    def close_connection(self):
+        connection: pika.channel.Channel | None = getattr(self, "connection", None)
+        if connection is not None:
+            connection.close()
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, **_):
+        self.close_connection()
+
+    def __del__(self):
+        self.close_connection()
