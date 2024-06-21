@@ -1,0 +1,64 @@
+{
+    "users": [
+        {
+          "name":"admin",
+          "password_hash":"BqfPVOtAvGN6iNXD2ep7zMTguQxlb06S4MSXh8J6K9+JkiY7",
+          "hashing_algorithm":"rabbit_password_hashing_sha256",
+          "tags":"administrator"
+        }
+    ],
+    "vhosts": [
+        {
+            "name":"/"
+        }
+    ],
+    "queues": [
+        {
+            "name": "resolver",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "vectorizer",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        }
+    ],
+    "exchanges": [
+        {
+            "name": "marketspace",
+            "vhost": "/",
+            "type": "direct",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        }
+    ],
+    "bindings": [
+        {
+            "source": "markespace",
+            "vhost": "/",
+            "destination": "resolver",
+            "destination_type": "queue",
+            "routing_key": "markespace.resolver",
+            "arguments": {}
+        },
+        {
+            "source": "markespace",
+            "vhost": "/",
+            "destination": "vectorizer",
+            "destination_type": "queue",
+            "routing_key": "markespace.vectorizer",
+            "arguments": {}
+        }
+      ]
+}

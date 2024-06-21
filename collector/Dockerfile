@@ -4,11 +4,11 @@ WORKDIR /collector
 
 ARG type
 
-COPY product_collector/$type/requirements.txt /requirements.txt
+COPY collector/$type/requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
 
-COPY product_collector/$type/src/ src/
+COPY collector/$type/src/ src/
 COPY utils/ utils/
 
 ENV PYTHONPATH "${PYTHONPATH}:/collector"
