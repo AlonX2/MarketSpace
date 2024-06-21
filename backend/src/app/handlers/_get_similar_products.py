@@ -2,14 +2,13 @@ import json, logging, pinecone
 
 from flask import current_app
 
+from utils.env import get_env_vars
 from src.app.microservice_client import MicroserviceClient, MicroserviceClientException
 
 logger = logging.getLogger(__package__)
 
-FEATURE_RESOLVER_QUEUE = "feature_resolver_queue"
-EMBEDDER_QUEUE = "embedder_queue"
-DB_SEARCHER_QUEUE = "db_searcher_queue"
-
+feature_resolver_queue = get_env_vars(["FEATURE_RESOLVER_QUEUE"], 
+                                      required=True)
 class GetSimilarProductsException(Exception):
     """Generic exception for the get_similar_products handler
     """
@@ -33,7 +32,7 @@ def get_similar_products(product_desc_json: str | bytes) -> dict[str, list[str]]
         raise
     
     try:        
-        product_embeddings_json: str = microservice_client.invoke(target_queue=FEATURE_RESOLVER_QUEUE, data_json=product_desc_json)
+        product_embeddings_json: str = microservice_client.invoke(target_queue=feature_resolver_queue, data_json=product_desc_json)
     except MicroserviceClientException as e:
         logger.error("Feature resolvance and embedding failed")
         raise GetSimilarProductsException("Feature resolvance and embedding failed") from e
