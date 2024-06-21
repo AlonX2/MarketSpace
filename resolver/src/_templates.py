@@ -1,6 +1,6 @@
 FEATURES_PROMPTS = {
-    "problem": "Given the product description in this url {url}, Describe the problem the product \"{name}\" addresses",
-    "market": "Given the product description in this url {url}, Describe the market of the product \"{name}\""
+    "problem": "Given the product description in this url {product_url}, Describe the problem the product \"{product_name}\" addresses",
+    "market": "Given the product description in this url {product_url}, Describe the market of the product \"{product_name}\""
 }
 
 COMPANY_PRODUCTS_PROMPT = """list all products by \"{company_url}\"

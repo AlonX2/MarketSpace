@@ -1,21 +1,24 @@
-import logging
+import dataclasses, json, logging, uuid
 
-from utils import get_env_vars
 from utils.product import Product, ProductRoutingInfo
-from utils.rabbit import RabbitChannel
+from utils.rabbit import RabbitClient
+from src.clients.interface import ILLMClient
+from src._templates import *
 
-logger = logging.getLogger("src")
+logger = logging.getLogger(__package__)
 
 class Resolver():
     """
     A class that resolves the features of the products given to it
     """
-    def __init__(self, from_backend, rabbit_client: RabbitChannel, output_exchange, output_routing_key) -> None:
+    def __init__(self, from_backend, rabbit_client: RabbitClient, llm_client: ILLMClient,output_exchange, output_routing_key) -> None:
         self.from_backend = from_backend
         self.rabbit_client = rabbit_client
+        self.llm_client = llm_client
         self.output_exchange = output_exchange
         self.output_routing_key = output_routing_key
         logger.info(f"Initialized Resolver with from_backend={self.from_backend}")
+    
 
     def build_product_from_msg(self, props, msg):
         """
@@ -47,49 +50,43 @@ class Resolver():
                                    reply_to=props.reply_to)
         logger.info(f"Product sent to vectorizer: {product_json}")
 
+    def load_templates_from_file(self):
+        pass
+
+    def resolve_from_template(self, template: str, **kwargs):
+        prompt = template.format(**kwargs)
+        res = self.llm_client.get_response(prompt)
+        return json.loads(res)
+    
+    def resolve_company_products(self, company_url: str):
+        """
+        Resolves the products of a given company using the LLM client.
+        """
+        products_desc_list = json.loads(self.resolve_from_template(COMPANY_PRODUCTS_PROMPT, company_url=company_url))
+        return [Product(uuid.uuid4(), name=product["product_name"], url=product["product_url"]) for product in products_desc_list]
+
+    def resolve_product_features(self, product_name: str, product_url: str):
+        """
+        Resolves the features of a given product using the LLM client.
+        """
+        product_features = dict()
+        for feature_name, feature_template in FEATURES_PROMPTS.items():
+            product_features[feature_name] = self.resolve_from_template(feature_template, product_name=product_name, product_url=product_url)
+        return product_features
+        
     def resolve_from_message(self, ch, method_frame, props, msg):
         """
         Resolves product information from a received message and processes it.
         """
         logger.info(f"Received message: props={props}, msg={msg}")
-        gpt_client = GPTClient()
         if self.from_backend:
             products = [self.build_product_from_msg(props, msg)]
         else:
             company_url = json.loads(msg)["url"]
-            products = resolve_company_products(gpt_client, company_url)
+            logger.debug(f"Resolving company products for URL: {company_url}")
+            products = self.resolve_company_products(company_url)
 
         for product in products:
-            resolve_product_features(gpt_client, product)
+            logger.debug(f"Resolving features for product: {product}")
+            product.features = self.resolve_product_features(product.name, product.url)
             self.send_to_vectorizer(product, props)
-
-
-def main():
-    backend_input_queue, collector_input_queue, output_exchange, output_rk = get_env_vars(["RABBIT_BACKEND_INPUT_QUEUE",
-                                                                                            "RABBIT_COLLECTOR_INPUT_QUEUE",
-                                                                                            "RABBIT_OUTPUT_EXCHANGE",
-                                                                                            "RABBIT_OUTPUT_ROUTING_KEY"],
-                                                                                            required=True)
-    
-    logging.info("Starting to listen for messages!")
-    rabbit_client = RabbitChannel.get_default_channel()
-    with open("nigger2.txt", "w") as f:
-        f.write("fuck")
-    backend_resolver = Resolver(from_backend=True,
-                                rabbit_client=rabbit_client,
-                                output_exchange=output_exchange,
-                                output_routing_key=output_rk)
-    
-    collection_resolver = Resolver(from_backend=False,
-                                   rabbit_client=rabbit_client,
-                                   output_exchange=output_exchange,
-                                   output_routing_key=output_rk)  
-      
-    rabbit_client.async_consume(backend_input_queue, backend_resolver.resolve_from_message)
-    rabbit_client.async_consume(collector_input_queue, collection_resolver.resolve_from_message)
-    logger.info("RabbitMQ consumers initialized and listening.")
-    
-    rabbit_client.start_consuming()
-    
-if __name__ == "__main__":
-    main()
