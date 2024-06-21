@@ -1,4 +1,4 @@
-from .clients import ILLMClient
+from .clients.interface import ILLMClient
 
 class PromptTemplateRunner():
     def __init__(self, llm_client: ILLMClient, template: str) -> None:
