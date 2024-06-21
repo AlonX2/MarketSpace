@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ProductRoutingInfo():
-    backend_request: bool
+    backend_request: bool = False
     corr_id: int = None
     target_queue: str = None
 
@@ -13,7 +13,7 @@ class Product:
     uid: str
     name: str
     url: str
-    routing_info: ProductRoutingInfo
+    routing_info: ProductRoutingInfo = field(default_factory=ProductRoutingInfo)
     features: dict[str, str] = field(default_factory=dict)
 
     @classmethod
