@@ -7,6 +7,12 @@ from ._templates import *
 logger = logging.getLogger(__package__)
 
 def resolve_product_features(llm_client: ILLMClient, product: Product):
+    """
+    Resolves the features of a given product using an LLM client.
+
+    :param llm_client: An instance of a class that implements the ILLMClient interface.
+    :param product: An instance of the Product class representing the product to resolve features for.
+    """
     logger.info(f"Resolving features for product: {product}")
     for feature_name, prompt_template in FEATURES_PROMPTS.items():
         feature_prompt = prompt_template.format(url=product.url, name=product.name)
@@ -18,6 +24,14 @@ class ResolveCompanyProductsError(Exception):
     pass
 
 def resolve_company_products(llm_client: ILLMClient, company_url: str) -> list[Product]:
+    """
+    Resolves the products of a given company using an LLM client.
+
+    :param llm_client: An instance of a class that implements the ILLMClient interface.
+    :param company_url: The URL of the company's website.
+    :return: A list of Product instances representing the resolved products.
+    :raises ResolveCompanyProductsError: If there is an error in resolving the products or if the response from the LLM client is invalid.
+    """
     logger.info(f"Resolving products for company URL: {company_url}")
     prompt = COMPANY_PRODUCTS_PROMPT.format(company_url=company_url)
     logger.debug(f"Sending prompt to LLM: {prompt}")
