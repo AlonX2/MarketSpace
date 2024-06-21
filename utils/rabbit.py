@@ -46,7 +46,7 @@ class RabbitClient():
         return cls(username=rabbit_username, password=rabbit_password, host=rabbit_host, port=rabbit_port, **extra_args)
     
     def publish(self, exchange, routing_key, content, **kwargs):
-        if self.connection.is_closed():
+        if self.connection.is_closed:
             raise RabbitClientException("Connection to Rabbit is closed, cannot publish")
         props = pika.BasicProperties(**kwargs) if len(kwargs) > 0 else None
         
@@ -60,7 +60,7 @@ class RabbitClient():
         return self.channel.queue_declare(queue="", exclusive=True).method.queue
 
     def consume(self, queue):
-        if self.connection.is_closed():
+        if self.connection.is_closed:
             raise RabbitClientException("Connection to Rabbit is closed, cannot consume")
         self.channel.queue_declare(queue=queue)
         get_ok, props, msg = self.channel.basic_get(queue=queue, auto_ack=True)
@@ -69,7 +69,7 @@ class RabbitClient():
         return props, msg
         
     def async_consume(self, queue, callback) -> None | str:
-        if self.connection.is_closed():
+        if self.connection.is_closed:
             raise RabbitClientException("Connection to Rabbit is closed, cannot async consume")
         self.channel.queue_declare(queue=queue)
         self.channel.basic_consume(queue=queue,
