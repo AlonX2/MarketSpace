@@ -1,6 +1,7 @@
 import logging, json
 
 from openai import OpenAI
+
 from ..interface import ILLMClient
 
 logger = logging.getLogger(__package__)
