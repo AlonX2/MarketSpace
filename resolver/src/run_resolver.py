@@ -1,10 +1,12 @@
-import dataclasses, json
+import dataclasses, json, logging
 
 from src.clients.gpt import GPTClient
 from src.resolvers import resolve_product_features, resolve_company_products
 from utils import get_env_vars
 from utils.product import Product, ProductRoutingInfo
 from utils.rabbit import RabbitClient
+
+logger = logging.getLogger(__package__)
 
 class Resolver():
     def __init__(self, from_backend, rabbit_client: RabbitClient, output_exchange, output_routing_key) -> None:
@@ -40,11 +42,13 @@ class Resolver():
 
 
 def main():
-    backend_input_queue, collector_input_queue, output_exchange, output_rk = get_env_vars(["RABBIT_BACKEND_INPUT_QUEUE"
+    backend_input_queue, collector_input_queue, output_exchange, output_rk = get_env_vars(["RABBIT_BACKEND_INPUT_QUEUE",
                                                                                             "RABBIT_COLLECTOR_INPUT_QUEUE",
                                                                                             "RABBIT_OUTPUT_EXCHANGE",
                                                                                             "RABBIT_OUTPUT_ROUTING_KEY"],
                                                                                             required=True)
+    
+    logging.info("Starting to listen for messages!")
     rabbit_client = RabbitClient.get_default_client()
 
     backend_resolver = Resolver(from_backend=True,
@@ -60,8 +64,5 @@ def main():
     rabbit_client.async_consume(backend_input_queue, backend_resolver.resolve_from_message)
     rabbit_client.async_consume(collector_input_queue, collection_resolver.resolve_from_message)
         
-
-        
-
-
-    
+if __name__ == "__main__":
+    main()

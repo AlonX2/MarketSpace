@@ -1,30 +1,4 @@
 services:
-  vectorizer:
-    build:
-      context: ..
-      dockerfile: vectorizer/Dockerfile
-    env_file:
-        - ./env/vectorizer.env
-        - ./env/api_keys.env
-
-  resolver:
-    build:
-      context: ..
-      dockerfile: resolver/Dockerfile
-    env_file:
-        - ./env/resolver.env
-        - ./env/api_keys.env
-
-  collector:
-    build:
-      context: ..
-      dockerfile: collector/Dockerfile
-      args:
-          - type=crunchbase
-    env_file:
-        - ./env/collector.env
-        - ./env/api_keys.env
-
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
@@ -37,6 +11,48 @@ services:
         - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     logging:
       driver: none
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  vectorizer:
+    build:
+      context: ..
+      dockerfile: vectorizer/Dockerfile
+    env_file:
+        - ./env/vectorizer.env
+        - ./env/api_keys.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  resolver:
+    build:
+      context: ..
+      dockerfile: resolver/Dockerfile
+    env_file:
+        - ./env/resolver.env
+        - ./env/api_keys.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  collector:
+    build:
+      context: ..
+      dockerfile: collector/Dockerfile
+      args:
+          - type=crunchbase
+    env_file:
+        - ./env/collector.env
+        - ./env/api_keys.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
 
 volumes:
   rabbitmq_logs:
