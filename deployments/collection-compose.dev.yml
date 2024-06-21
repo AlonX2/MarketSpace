@@ -13,10 +13,13 @@ services:
       driver: none
     healthcheck:
       test: rabbitmq-diagnostics -q ping
-      interval: 5s
-      timeout: 10s
+      interval: 1m
+      timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
+      start_interval: 5s
+    networks:
+        - rabbit_net
 
   vectorizer:
     build:
@@ -28,6 +31,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    networks:
+        - rabbit_net
 
   resolver:
     build:
@@ -53,7 +58,9 @@ services:
       rabbitmq:
         condition: service_healthy
 
-
 volumes:
   rabbitmq_logs:
     driver: local  
+
+networks:
+  rabbit_net: {}
