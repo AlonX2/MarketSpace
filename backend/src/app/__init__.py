@@ -1,7 +1,7 @@
 from flask import Flask 
 
-from app.custom_config import CustomConfig
-from app.events import socketio
+from src.app.custom_config import CustomConfig
+from src.app.events import socketio
 
 def create_app():
     app = Flask(__name__)

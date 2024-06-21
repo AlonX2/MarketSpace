@@ -4,8 +4,8 @@ sys.path.extend([".", "../."])
 from flask import Flask
 from unittest.mock import patch, MagicMock
 
-from backend.app.handlers._get_similar_products import *
-from backend.app.custom_config import CustomConfig
+from src.app.handlers._get_similar_products import *
+from src.app.custom_config import CustomConfig
 
 
 @pytest.fixture

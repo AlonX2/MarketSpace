@@ -1,16 +1,14 @@
-import json, logging
+import json, logging, pinecone
 
 from flask import current_app
 
-from db_client import IDbClient, DbClientException
-from app.microservice_client import MicroserviceClient, MicroserviceClientException
+from utils.env import get_env_vars
+from src.app.microservice_client import MicroserviceClient, MicroserviceClientException
 
 logger = logging.getLogger(__package__)
 
-FEATURE_RESOLVER_QUEUE = "feature_resolver_queue"
-EMBEDDER_QUEUE = "embedder_queue"
-DB_SEARCHER_QUEUE = "db_searcher_queue"
-
+feature_resolver_queue = get_env_vars(["FEATURE_RESOLVER_QUEUE"], 
+                                      required=True)
 class GetSimilarProductsException(Exception):
     """Generic exception for the get_similar_products handler
     """
@@ -28,13 +26,13 @@ def get_similar_products(product_desc_json: str | bytes) -> dict[str, list[str]]
     """
     try:
         microservice_client: MicroserviceClient = current_app.config["CUSTOM"].microservice_client
-        db_client: IDbClient = current_app.config["CUSTOM"].db_client
+        vdb_index: pinecone.Index = current_app.config["CUSTOM"].vdb_index
     except KeyError:
-        logger.error("Couldn\'t access microservice_client and/or db_client from CUSTOM config of app")
+        logger.error("Couldn\'t access microservice_client and/or vdb_index from CUSTOM config of app")
         raise
     
     try:        
-        product_embeddings_json: str = microservice_client.invoke(target_queue=FEATURE_RESOLVER_QUEUE, data_json=product_desc_json)
+        product_embeddings_json: str = microservice_client.invoke(target_queue=feature_resolver_queue, data_json=product_desc_json)
     except MicroserviceClientException as e:
         logger.error("Feature resolvance and embedding failed")
         raise GetSimilarProductsException("Feature resolvance and embedding failed") from e
@@ -44,11 +42,7 @@ def get_similar_products(product_desc_json: str | bytes) -> dict[str, list[str]]
 
     similar_products: dict[str, list[str]] = dict()
     for feature_name, embedding in product_embeddings.items():
-        try:
-            similar_products[feature_name] = db_client.query(vector=embedding, space=feature_name, num=5)
-        except DbClientException as e:
-            logger.error("Vector DB client failed getting similar embeddings for features")
-            raise GetSimilarProductsException("Vector DB client failed getting similar embeddings for features")
+        similar_products[feature_name] = vdb_index.query(vector=embedding, namespace=feature_name, top_k=5)
     
     logger.info("Finished acquiring similar products")
     return similar_products

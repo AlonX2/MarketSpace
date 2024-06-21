@@ -3,7 +3,7 @@ import pytest, uuid
 from unittest.mock import patch, MagicMock
 from typing import Tuple
 
-from backend.app.microservice_client import MicroserviceClient
+from src.app.microservice_client import MicroserviceClient
 
 
 @pytest.fixture
