@@ -9,6 +9,9 @@ from utils.rabbit import RabbitClient
 logger = logging.getLogger(__package__)
 
 class Resolver():
+    """
+    A class that resolves the features of the products given to it
+    """
     def __init__(self, from_backend, rabbit_client: RabbitClient, output_exchange, output_routing_key) -> None:
         self.from_backend = from_backend
         self.rabbit_client = rabbit_client
@@ -17,6 +20,13 @@ class Resolver():
         logger.info(f"Initialized Resolver with from_backend={self.from_backend}")
 
     def build_product_from_msg(self, props, msg):
+        """
+        Builds a Product instance from a given message.
+
+        :param props: The properties of the RabbitMQ message.
+        :param msg: The message content in JSON format.
+        :return: An instance of the Product class.
+        """
         logger.debug(f"Building product from message: props={props}, msg={msg}")
         routing_info = ProductRoutingInfo(backend_request=self.from_backend, corr_id=props.correlation_id, target_queue=props.reply_to)
         product_info = json.loads(msg)
@@ -24,6 +34,12 @@ class Resolver():
         return product
     
     def send_to_vectorizer(self, product, props):
+        """
+        Sends the product information to a vectorizer via RabbitMQ.
+
+        :param product: An instance of the Product class.
+        :param props: The properties of the message.
+        """
         logger.debug(f"Sending product to vectorizer: product={product}, props={props}")
         product_json = json.dumps(dataclasses.asdict(product))
         self.rabbit_client.publish(self.output_exchange,
@@ -34,6 +50,9 @@ class Resolver():
         logger.info(f"Product sent to vectorizer: {product_json}")
 
     def resolve_from_message(self, ch, method_frame, props, msg):
+        """
+        Resolves product information from a received message and processes it.
+        """
         logger.info(f"Received message: props={props}, msg={msg}")
         gpt_client = GPTClient()
         if self.from_backend:
