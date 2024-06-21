@@ -4,7 +4,8 @@ from pinecone import Pinecone
 from openai import OpenAI
 
 from src._drivers import IVectorspaceDriver, DriverError
-from ._config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_INDEX_NAME, BATCH_SIZE
+from ._config import BATCH_SIZE
+from utils import get_env_vars
 from utils.logging import format_logged_substring
 
 logger = logging.getLogger(__package__)
@@ -12,9 +13,12 @@ logger = logging.getLogger(__package__)
 class OpenaiPineconeDriver(IVectorspaceDriver):
     RECOMMENDED_BATCH_SIZE = BATCH_SIZE
     def __init__(self):
+        openai_key, pinecone_key, pinecone_index = get_env_vars(["OPENAI_API_KEY",
+                                                                 "PINECONE_API_KEY",
+                                                                 "PINECONE_INDEX_NAME"], required=True)
         try:
-            self.openai_client = OpenAI(api_key=OPENAI_API_KEY)
-            self.pinecone_index = Pinecone(api_key=PINECONE_API_KEY).Index(PINECONE_INDEX_NAME)
+            self.openai_client = OpenAI(api_key=openai_key)
+            self.pinecone_index = Pinecone(api_key=pinecone_key).Index(pinecone_index)
         except Exception:
             logger.error("Failed to initialize openai and pinecone clients, possibly because of bad API keys.")
             raise
