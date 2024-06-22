@@ -6,7 +6,7 @@ from src.config import CRUNCHBASE_API_ENDPOINT
 from utils import get_env_vars
 from utils.rabbit import RabbitChannel
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("src")
 
 def get_orgs_by_categories(categories: list[str], start_date: str = None, end_date: str = None) -> list[dict]:
     """
@@ -20,7 +20,7 @@ def get_orgs_by_categories(categories: list[str], start_date: str = None, end_da
     """
 
     query_url = f"{CRUNCHBASE_API_ENDPOINT}/searches/organizations"
-    query = CrunchbaseSearchQuery(query_url, requested_fields=CrunchbaseOrganization.required_fields)
+    query = CrunchbaseSearchQuery(query_url, requested_fields=CrunchbaseOrganization.get_required_fields())
 
     query.add_filter("categories", "Includes", categories)
     query.define_sorting("rank_org")
@@ -43,7 +43,7 @@ def collect():
     start_date, end_date = get_env_vars(["START_DATE", "END_DATE"])
 
     logger.info("Starting to build query to get orgs.")
-    orgs =  get_orgs_by_categories(org_categories, start_date, end_date)
+    orgs =  get_orgs_by_categories(org_categories.split(","), start_date, end_date)
 
     with RabbitChannel.get_default_channel() as rabbit_channel:
         for org_info in orgs:

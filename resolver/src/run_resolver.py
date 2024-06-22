@@ -6,7 +6,7 @@ from utils import get_env_vars
 from utils.product import Product, ProductRoutingInfo
 from utils.rabbit import RabbitChannel
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("src")
 
 class Resolver():
     def __init__(self, from_backend, rabbit_client: RabbitChannel, output_exchange, output_routing_key) -> None:
@@ -72,6 +72,9 @@ def main():
     rabbit_client.async_consume(backend_input_queue, backend_resolver.resolve_from_message)
     rabbit_client.async_consume(collector_input_queue, collection_resolver.resolve_from_message)
     logger.info("RabbitMQ consumers initialized and listening.")
+    
+    while True:
+        pass
     
 if __name__ == "__main__":
     main()

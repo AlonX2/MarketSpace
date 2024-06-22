@@ -31,6 +31,8 @@ services:
     env_file:
         - ./env/vectorizer.env
         - ./env/api_keys.env
+        - ./env/rabbit_creds.env
+
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -38,19 +40,21 @@ services:
         - rabbit_net
     logging:
       driver: local
-    environment:
-      PYTHONUNBUFFERED: 1 
 
   resolver:
     build:
       context: ..
       dockerfile: resolver/Dockerfile
+    container_name: resolver
     env_file:
         - ./env/resolver.env
         - ./env/api_keys.env
+        - ./env/rabbit_creds.env
     depends_on:
       rabbitmq:
         condition: service_healthy
+    networks:
+        - rabbit_net
 
   collector:
     build:
@@ -58,16 +62,20 @@ services:
       dockerfile: collector/Dockerfile
       args:
           - type=crunchbase
+    container_name: collector
     env_file:
         - ./env/collector.env
         - ./env/api_keys.env
+        - ./env/rabbit_creds.env
     depends_on:
       rabbitmq:
         condition: service_healthy
+    networks:
+        - rabbit_net
 
 volumes:
   rabbitmq_logs:
-    driver: local  
+    driver: local
 
 networks:
   rabbit_net: {}
