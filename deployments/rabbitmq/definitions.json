@@ -25,7 +25,7 @@
         {
             "name": "resolver",
             "vhost": "/",
-            "durable": true,
+            "durable": false,
             "auto_delete": false,
             "arguments": {
                 "x-queue-type": "classic"
@@ -34,7 +34,7 @@
         {
             "name": "vectorizer",
             "vhost": "/",
-            "durable": true,
+            "durable": false,
             "auto_delete": false,
             "arguments": {
                 "x-queue-type": "classic"

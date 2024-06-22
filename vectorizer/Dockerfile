@@ -10,5 +10,5 @@ COPY vectorizer/src/ src/
 COPY utils/ utils/
 
 ENV PYTHONPATH "${PYTHONPATH}:/vectorizer"
-
+ENV PYTHONUNBUFFERED "1"
 ENTRYPOINT ["python", "src/run_vectorizer.py"]

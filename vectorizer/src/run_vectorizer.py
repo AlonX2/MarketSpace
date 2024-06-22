@@ -1,5 +1,4 @@
 import logging, json, time
-
 from src._drivers import OpenaiPineconeDriver
 from src.inserter import Inserter
 from src.feature import ProductFeature
@@ -8,7 +7,7 @@ from utils import get_env_vars
 from utils.rabbit import RabbitClient, NoMessagesFoundException
 from utils.product import Product
 
-logger =  logging.getLogger(__package__)
+logger = logging.getLogger("src")
 
 def insert_product_to_vdb(product: Product):
     logger.debug("Starting to insert product features to vector db.")
@@ -39,12 +38,12 @@ def main():
     rabbit_client = RabbitClient.get_default_client()
 
     while True:
-        logger.info(f"looking for message in queue {rabbit_input_queue}...")
+        logger.info(f"Looking for message in queue '{rabbit_input_queue}'")
 
         try:
             _, msg = rabbit_client.consume(rabbit_input_queue)
         except NoMessagesFoundException:
-            logger.info(f"Queue empty, waiting {EMPTY_QUEUE_SLEEP_TIME} secs and trying again...")
+            logger.info(f"Queue empty, waiting {EMPTY_QUEUE_SLEEP_TIME} secs and trying again")
             time.sleep(EMPTY_QUEUE_SLEEP_TIME)
             continue
 
