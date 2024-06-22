@@ -1,3 +1,5 @@
+name: marketspace
+
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -16,7 +18,7 @@ services:
       interval: 1m
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 20s
       start_interval: 5s
     networks:
         - rabbit_net
@@ -25,6 +27,7 @@ services:
     build:
       context: ..
       dockerfile: vectorizer/Dockerfile
+    container_name: vectorizer
     env_file:
         - ./env/vectorizer.env
         - ./env/api_keys.env
@@ -33,6 +36,10 @@ services:
         condition: service_healthy
     networks:
         - rabbit_net
+    logging:
+      driver: local
+    environment:
+      PYTHONUNBUFFERED: 1 
 
   resolver:
     build:

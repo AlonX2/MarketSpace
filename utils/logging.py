@@ -1,16 +1,18 @@
 import logging
 
-def setup_logger():
+def setup_logger(logger: logging.Logger):
     """
-    Setups logging.
+    Setups a logger.
     """
-    logger = logging.getLogger(__package__)
+    logging.basicConfig()
+    
     logger.setLevel(logging.DEBUG)
+    logger.propagate = False
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('[%(asctime)s - %(name)s - %(levelname)s]:  %(message)s')
+    formatter = logging.Formatter('[%(asctime)s - %(name)s - %(levelname)s]:  %(message)s', datefmt="%d/%m/%Y %I:%M:%S %p %Z")
 
     ch.setFormatter(formatter)
 
