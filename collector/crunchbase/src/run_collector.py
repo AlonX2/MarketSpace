@@ -1,24 +1,12 @@
-import pika
+import pika, logging
 
 from src.crunchbase_org import CrunchbaseOrganization
 from src.crunchbase_query import CrunchbaseSearchQuery
 from src.config import CRUNCHBASE_API_ENDPOINT
 from utils import get_env_vars
+from utils.rabbit import RabbitChannel
 
-def send_to_rabbit(content: str):
-    """
-    Sends a message with custom content to a rabbitmq queue, where the host, exchange and rk are dictated by env vars.
-    :param content: The content to send to the rabbitmq queue.
-    """
-    
-    host, exchange, routing_key = get_env_vars(["RABBIT_HOST", "RABBIT_EXCHANGE", "RABBIT_ROUTING_KEY"], 
-                                               required=True)
-    
-    with pika.BlockingConnection(pika.ConnectionParameters(host=host)) as conn:
-        channel = conn.channel()
-        channel.basic_publish(exchange=exchange,
-                              routing_key=routing_key,
-                              body=content)
+logger = logging.getLogger(__package__)
 
 def get_orgs_by_categories(categories: list[str], start_date: str = None, end_date: str = None) -> list[dict]:
     """
@@ -49,14 +37,19 @@ def collect():
     Starts collecting organizations from Crunchbase, categories and date limits dictated by env vars.
     Sends a message to rabbit queue for each org found.
     """
-
-    org_categories, = get_env_vars(["CATEGORIES"], required=True)
+    org_categories, rabbit_exchange, rabbit_rk = get_env_vars(["CATEGORIES",
+                                                               "RABBIT_EXCHANGE",
+                                                               "RABBIT_ROUTING_KEY"], required=True)
     start_date, end_date = get_env_vars(["START_DATE", "END_DATE"])
-    
+
+    logger.info("Starting to build query to get orgs.")
     orgs =  get_orgs_by_categories(org_categories, start_date, end_date)
-    for org_info in orgs:
-        org = CrunchbaseOrganization.create_from_org_fields(org_info)
-        send_to_rabbit(org.json())
+
+    with RabbitChannel.get_default_channel() as rabbit_channel:
+        for org_info in orgs:
+            org = CrunchbaseOrganization.create_from_org_fields(org_info)
+            logger.info(f"Sending org {repr(org)} to rabbit.")
+            rabbit_channel.publish(rabbit_exchange, rabbit_rk, org.json)
 
 if __name__ == "__main__":
     collect()

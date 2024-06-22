@@ -4,12 +4,12 @@ from src.clients.gpt import GPTClient
 from src.resolvers import resolve_product_features, resolve_company_products
 from utils import get_env_vars
 from utils.product import Product, ProductRoutingInfo
-from utils.rabbit import RabbitClient
+from utils.rabbit import RabbitChannel
 
 logger = logging.getLogger(__package__)
 
 class Resolver():
-    def __init__(self, from_backend, rabbit_client: RabbitClient, output_exchange, output_routing_key) -> None:
+    def __init__(self, from_backend, rabbit_client: RabbitChannel, output_exchange, output_routing_key) -> None:
         self.from_backend = from_backend
         self.rabbit_client = rabbit_client
         self.output_exchange = output_exchange
@@ -57,7 +57,7 @@ def main():
                                                                                             required=True)
     
     logging.info("Starting to listen for messages!")
-    rabbit_client = RabbitClient.get_default_client()
+    rabbit_client = RabbitChannel.get_default_channel()
 
     backend_resolver = Resolver(from_backend=True,
                                 rabbit_client=rabbit_client,

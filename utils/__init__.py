@@ -9,6 +9,6 @@ def _setup_logger():
     import logging
     logger = logging.getLogger(__package__)
     logger.name = "utils"
-    setup_logger(logger=logger)
+    setup_logger(logger)
 
 _setup_logger()

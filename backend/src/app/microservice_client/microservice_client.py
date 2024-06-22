@@ -1,6 +1,6 @@
 import uuid, logging
 
-from utils.rabbit import RabbitClient
+from utils.rabbit import RabbitChannel
 from utils.call_future import CallFuture
 from ._config import *
 from .exceptions import *
@@ -15,7 +15,7 @@ class MicroserviceClient():
             cls.instance = super(MicroserviceClient, cls).__new__(cls)
         return cls.instance
     
-    def __init__(self, rabbit_client: RabbitClient) -> None:
+    def __init__(self, rabbit_client: RabbitChannel) -> None:
         """Initializes the `MicroserviceClient` class.
 
         Initializes the connection and the callback queue of the client.
@@ -77,5 +77,5 @@ class MicroserviceClient():
             logger.error(str(_call_future.error))
             raise _call_future.error
         
-        logger.info("Succesfult acquired result from the microservice")
+        logger.info("Succesfuly acquired result from the microservice")
         return _call_future.result
