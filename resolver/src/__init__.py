@@ -1,3 +1,13 @@
-from utils.logging import setup_logger
+def _setup_logger():
+    """
+    Setups logging for the vectorspace_driver package.
+    """
 
-setup_logger()
+    import logging
+    from utils import setup_logger
+
+    logger = logging.getLogger(__package__)
+    logger.name = "resolver"
+    setup_logger(logger)
+
+_setup_logger()

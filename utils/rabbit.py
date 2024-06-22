@@ -5,35 +5,35 @@ import pika, pika.channel, pika.exceptions
 from utils import get_env_vars
 
 logger = logging.getLogger()
-class RabbitClientException(Exception):
+class RabbitChannelException(Exception):
     pass
 
-class NoMessagesFoundException(RabbitClientException):
+class NoMessagesFoundException(RabbitChannelException):
     pass
 
-class RabbitClient():
+class RabbitChannel():
     def __init__(self, username = None, password = None, **kwargs):
         if username or password:
             if not (username and password):
-                raise RabbitClientException("Failed to initialize rabbit client: "
+                raise RabbitChannelException("Failed to initialize rabbit client: "
                                         "Cannot provide username or password without the other (must provide both or nothing at all).")
             
             kwargs["credentials"] = pika.PlainCredentials(username, password)
 
         try:
             connection_params = pika.ConnectionParameters(**kwargs)
-            self.connection = pika.BlockingConnection(connection_params)
+            self._connection = pika.BlockingConnection(connection_params)
             logger.info("Established connection to RabbitMQ server")
         except pika.exceptions.AMQPConnectionError as e:
             logger.error("Failed to connect to RabbitMQ server")
-            raise RabbitClientException("Failed to connect to RabbitMQ server") from e
+            raise RabbitChannelException("Failed to connect to RabbitMQ server") from e
 
-        self.channel = self.connection.channel()
-        self.channel.confirm_delivery()
+        self._channel = self._connection.channel()
+        self._channel.confirm_delivery()
         logger.info("Created channel to RabbitMQ exchange server")
      
     @classmethod
-    def get_default_client(cls, **extra_args):
+    def get_default_channel(cls, **extra_args):
         """
         Builds a default RabbitClient by the standard environment variables.
         """
@@ -46,46 +46,48 @@ class RabbitClient():
         return cls(username=rabbit_username, password=rabbit_password, host=rabbit_host, port=rabbit_port, **extra_args)
     
     def publish(self, exchange, routing_key, content, **kwargs):
-        if self.connection.is_closed:
-            raise RabbitClientException("Connection to Rabbit is closed, cannot publish")
+        if self._connection.is_closed:
+            raise RabbitChannelException("Connection to Rabbit is closed, cannot publish")
         props = pika.BasicProperties(**kwargs) if len(kwargs) > 0 else None
         
-        self.channel.basic_publish(exchange=exchange,
+        self._channel.basic_publish(exchange=exchange,
                                 routing_key=routing_key,
                                 body=content,
                                 properties=props,
                                 mandatory=True)    
 
     def create_exclusive_queue(self):
-        return self.channel.queue_declare(queue="", exclusive=True).method.queue
+        return self._channel.queue_declare(queue="", exclusive=True).method.queue
 
     def consume(self, queue):
-        if self.connection.is_closed:
-            raise RabbitClientException("Connection to Rabbit is closed, cannot consume")
-        self.channel.queue_declare(queue=queue)
-        get_ok, props, msg = self.channel.basic_get(queue=queue, auto_ack=True)
+        if self._connection.is_closed:
+            raise RabbitChannelException("Connection to Rabbit is closed, cannot consume")
+        self._channel.queue_declare(queue=queue)
+        get_ok, props, msg = self._channel.basic_get(queue=queue, auto_ack=True)
         if get_ok is None:
             raise NoMessagesFoundException("No messages in queue")
         return props, msg
         
     def async_consume(self, queue, callback) -> None | str:
-        if self.connection.is_closed:
-            raise RabbitClientException("Connection to Rabbit is closed, cannot async consume")
-        self.channel.queue_declare(queue=queue)
-        self.channel.basic_consume(queue=queue,
+        if self._connection.is_closed:
+            raise RabbitChannelException("Connection to Rabbit is closed, cannot async consume")
+        self._channel.queue_declare(queue=queue)
+        self._channel.basic_consume(queue=queue,
                                 on_message_callback=callback,
                                 auto_ack=True)
         
-    def close_connection(self):
-        connection: pika.channel.Channel | None = getattr(self, "connection", None)
-        if connection is not None:
-            connection.close()
+    def close(self):
+        if self._connection is not None:
+            self._connection.close()
+        else:
+            raise RabbitChannelException("Attempted to close an already closed channel")
     
     def __enter__(self):
         return self
     
     def __exit__(self, **_):
-        self.close_connection()
+        self.close()
 
     def __del__(self):
-        self.close_connection()
+        if not self._connection.is_closed:
+            self.close()

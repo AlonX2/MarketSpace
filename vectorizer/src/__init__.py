@@ -8,6 +8,6 @@ def _setup_logger():
 
     logger = logging.getLogger(__package__)
     logger.name = "vectorizer"
-    setup_logger(logger=logger)
+    setup_logger(logger)
 
 _setup_logger()

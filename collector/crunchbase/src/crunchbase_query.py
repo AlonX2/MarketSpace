@@ -1,9 +1,11 @@
-import requests
+import requests, logging
 
 from src.exceptions import CrunchbaseQueryError
 from utils import get_env_vars
 
 PAGINATION_BATCH_SIZE = 500
+
+logger = logging.getLogger(__package__)
 
 class CrunchbaseSearchQuery():
     """
@@ -23,6 +25,8 @@ class CrunchbaseSearchQuery():
         self._url = url
         self._query = {"field_ids": requested_fields}
 
+        logger.debug(f"Initialized crunchbase query object with url '{url}' with requested fields '{requested_fields}'.")
+
     def execute(self) -> list[dict]:
         """
         Execute the query with pagination until theres no more results.
@@ -36,16 +40,22 @@ class CrunchbaseSearchQuery():
         executing_query = self._query.copy()
         executing_query["limit"] = PAGINATION_BATCH_SIZE
 
+        logger.info("Starting to execute query")
+        logger.debug(f"Executing query state: {executing_query}")
+
         entities = []
         while True:
             if len(entities) > 0:
                 previous_item_id = entities[-1]["uuid"]
                 executing_query["after_id"] = previous_item_id
-
+            
             content = self._perform_request(api_key, executing_query)
+
+            logger.info(f"Got {len(content['entities'])} entities from crunchbase.")
 
             entities.extend(content["entities"])
             if len(content["entities"]) < PAGINATION_BATCH_SIZE:
+                logger.info(f"Finished exectuting query, got {len(entities)} results.")
                 break
 
         return entities
@@ -72,6 +82,8 @@ class CrunchbaseSearchQuery():
         }
         self._query["query"].append(filter)
 
+        logger.debug(f"Added filter '{filter}' to query. Current query state: '{self._query}'.")
+
     def define_sorting(self, key_field: str, desc: bool = True):
         """
         Defines a sorting for the query, by a specific field.
@@ -86,6 +98,8 @@ class CrunchbaseSearchQuery():
                      "field_id": key_field,
                      "sort": "desc" if desc else "asc"
                  }
+        
+        logger.debug(f"Added sorting by '{key_field}' to query. Current query state: '{self._query}'.")
 
     def _ensure_query_integrity(self):
          """
@@ -104,11 +118,14 @@ class CrunchbaseSearchQuery():
         :returns: The response dict.
         """
         try:
+            logger.debug(f"About to perform request to crunchbase, with url '{self._url}' and query '{query}'.")
             resp = requests.post(self._url, params={"user_key": api_key}, json=query)
         except requests.exceptions.RequestException as e:
             raise CrunchbaseQueryError(f"Failed to perform query due to requests error.") from e
             
         if resp.status_code != 200:
             raise CrunchbaseQueryError(f"Failed to perform query, got status code {resp.status_code}")
+        
+        logger.debug(f"Performed request to crunchbase, got {repr(resp)}")
 
         return resp.json()

@@ -1,31 +1,44 @@
 from __future__ import annotations
 
-import requests, json, os
+import json, os, dataclasses, logging
+from typing import ClassVar
+
+import requests
 
 from src.exceptions import CrunchbaseQueryError
 from src.config import CRUNCHBASE_API_ENDPOINT
+from utils import get_env_vars
 
+logger = logging.getLogger(__package__)
+
+@dataclasses.dataclass
 class CrunchbaseOrganization():
     """
     A class that encapsulates data received from crunchbase about a company.
     Supports getting additional info from crunchbase about the org.
     """
 
-    required_fields = ["name", "uuid", "website_url"] # the fields required to construct a CrunchbaseOrganization object.
+    name: str
+    uuid: int
+    url: str
 
-    def __init__(self, name, uuid, url):
-        self.name = name
-        self.uuid = uuid
-        self.url = url
-    
     @classmethod
-    def create_from_uuid(cls, uuid: str) -> CrunchbaseOrganization:
+    def get_required_fields(cls) -> list[str]:
+        """
+        Returns the info fields about an org required to create this object.
+        """
+        return [field.name for field in dataclasses.fields(cls)]
+        
+    @classmethod
+    def create_from_uuid(cls, uuid: int) -> CrunchbaseOrganization:
         """
         Factory method to generate a CrunchbaseOrganization from an organization uuid.
         Performs an API call to crunchbase to get info on the requested org.
         :param uuid: The uuid of the org to create an CrunchbaseOrganization object from.
         :returns: The generated CrunchbaseOrganization object.
         """
+
+        logger.debug(f"Creating CrunchbaseOrganization for uuid '{uuid}'")
 
         org_info = cls._get_org_info_by_uuid(uuid)
         fields = org_info["cards"]["fields"]
@@ -42,7 +55,9 @@ class CrunchbaseOrganization():
         :returns: The generated CrunchbaseOrganization object.
         """
 
-        if not all((field in org_fields) for field in cls.required_fields):
+        logger.debug(f"Creating CrunchbaseOrganization for org_fields '{org_fields}'")
+
+        if not all((field in org_fields) for field in cls.get_required_fields()):
             if query_for_missing_info and "uuid" in org_fields:
                 return cls.create_from_uuid(org_fields["uuid"])
             else:
@@ -51,27 +66,28 @@ class CrunchbaseOrganization():
         return cls(org_fields["name"], org_fields["uuid"], org_fields["website_url"])
 
     @classmethod
-    def _get_org_info_by_uuid(cls, uuid: str) -> dict:
+    def _get_org_info_by_uuid(cls, uuid: int) -> dict:
         """
         Performs a Crunchbase API call to get info on an org by its uuid.
         :param uuid: The uuid of the org to get the info of.
         :returns: An org info dict for the org.
         """
-        api_key = os.getenv("CRUNCHBASE_API_KEY")
-        query = {"field_ids": cls.required_fields, "card_ids": []}
+        api_key, = get_env_vars(["CRUNCHBASE_API_KEY"], required=True)
+
+        query = {"field_ids": cls.get_required_fields(), "card_ids": []}
+        logger.debug(f"Getting additional fields about org uuid '{uuid}'. Query is '{query}'.")
         resp = requests.get(f"{CRUNCHBASE_API_ENDPOINT}/entities/organizations/{uuid}", params={"user_key": api_key}, json=query)
+        logger.debug(f"Got '{repr(resp)}'")
         return resp.content
 
+    @property
     def json(self) -> str:
         """
         Get json string with the organization data.
         :returns: A json-formatted string with all the data of the org object.
         """
-        
-        dict_values =  {
-            "name": self._name,
-            "uuid": self._uuid,
-            "url": self._url
-        }
 
-        return json.dumps(dict_values)
+        return json.dumps(dataclasses.asdict(self))
+    
+
+    

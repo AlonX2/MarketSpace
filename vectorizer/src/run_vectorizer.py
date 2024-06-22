@@ -4,7 +4,7 @@ from src.inserter import Inserter
 from src.feature import ProductFeature
 from src.config import EMPTY_QUEUE_SLEEP_TIME
 from utils import get_env_vars
-from utils.rabbit import RabbitClient, NoMessagesFoundException
+from utils.rabbit import RabbitChannel, NoMessagesFoundException
 from utils.product import Product
 
 logger = logging.getLogger("src")
@@ -19,7 +19,7 @@ def insert_product_to_vdb(product: Product):
         for vectorspace, text in product.features.items():
             inserter.register_feature(ProductFeature(text=text, vectorspace=vectorspace, metadata=metadata, driver=driver))
 
-def send_features_to_rabbit(rabbit_client: RabbitClient, product: Product):
+def send_features_to_rabbit(rabbit_client: RabbitChannel, product: Product):
     logger.debug("Starting to send product features back to backend.")
 
     exchange = get_env_vars(["RABBIT_OUTPUT_EXCHANGE"],
@@ -35,13 +35,13 @@ def send_features_to_rabbit(rabbit_client: RabbitClient, product: Product):
 
 def main():
     rabbit_input_queue, = get_env_vars(["RABBIT_INPUT_QUEUE"], required=True)
-    rabbit_client = RabbitClient.get_default_client()
+    rabbit_channel = RabbitChannel.get_default_channel()
 
     while True:
         logger.info(f"Looking for message in queue '{rabbit_input_queue}'")
 
         try:
-            _, msg = rabbit_client.consume(rabbit_input_queue)
+            _, msg = rabbit_channel.consume(rabbit_input_queue)
         except NoMessagesFoundException:
             logger.info(f"Queue empty, waiting {EMPTY_QUEUE_SLEEP_TIME} secs and trying again")
             time.sleep(EMPTY_QUEUE_SLEEP_TIME)
@@ -51,9 +51,9 @@ def main():
         logger.info(f"Got product {repr(product)}")
 
         if product.routing_info.backend_request:
-            send_features_to_rabbit(rabbit_client, product)
+            send_features_to_rabbit(rabbit_channel, product)
         else:
             insert_product_to_vdb(product)
-
+    
 if __name__ == "__main__":
     main()
