@@ -40,11 +40,9 @@ class Resolver():
             products = [self.build_product_from_msg(props, msg)]
         else:
             company_url = json.loads(msg)["url"]
-            logger.debug(f"Resolving company products for URL: {company_url}")
             products = resolve_company_products(gpt_client, company_url)
 
         for product in products:
-            logger.debug(f"Resolving features for product: {product}")
             resolve_product_features(gpt_client, product)
             self.send_to_vectorizer(product, props)
 
@@ -58,7 +56,8 @@ def main():
     
     logging.info("Starting to listen for messages!")
     rabbit_client = RabbitChannel.get_default_channel()
-
+    with open("nigger2.txt", "w") as f:
+        f.write("fuck")
     backend_resolver = Resolver(from_backend=True,
                                 rabbit_client=rabbit_client,
                                 output_exchange=output_exchange,
@@ -73,8 +72,7 @@ def main():
     rabbit_client.async_consume(collector_input_queue, collection_resolver.resolve_from_message)
     logger.info("RabbitMQ consumers initialized and listening.")
     
-    while True:
-        pass
+    rabbit_client.start_consuming()
     
 if __name__ == "__main__":
     main()

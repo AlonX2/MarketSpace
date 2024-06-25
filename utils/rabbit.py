@@ -76,6 +76,9 @@ class RabbitChannel():
                                 on_message_callback=callback,
                                 auto_ack=True)
         
+    def start_consuming(self):
+        self._channel.start_consuming()
+        
     def close(self):
         if self._connection is not None:
             self._connection.close()
