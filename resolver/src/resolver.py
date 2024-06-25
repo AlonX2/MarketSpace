@@ -1,7 +1,7 @@
 import dataclasses, json, logging, uuid
 
 from utils.product import Product, ProductRoutingInfo
-from utils.rabbit import RabbitClient
+from utils.rabbit import RabbitChannel
 from src.clients.interface import ILLMClient
 from src._templates import *
 
@@ -11,9 +11,9 @@ class Resolver():
     """
     A class that resolves the features of the products given to it
     """
-    def __init__(self, from_backend, rabbit_client: RabbitClient, llm_client: ILLMClient,output_exchange, output_routing_key) -> None:
+    def __init__(self, from_backend, rabbit_channel: RabbitChannel, llm_client: ILLMClient, output_exchange, output_routing_key) -> None:
         self.from_backend = from_backend
-        self.rabbit_client = rabbit_client
+        self.rabbit_channel = rabbit_channel
         self.llm_client = llm_client
         self.output_exchange = output_exchange
         self.output_routing_key = output_routing_key
@@ -43,7 +43,7 @@ class Resolver():
         """
         logger.debug(f"Sending product to vectorizer: product={product}, props={props}")
         product_json = json.dumps(dataclasses.asdict(product))
-        self.rabbit_client.publish(self.output_exchange,
+        self.rabbit_channel.publish(self.output_exchange,
                                    self.output_routing_key,
                                    product_json,
                                    correlation_id=props.correlation_id,
@@ -56,14 +56,15 @@ class Resolver():
     def resolve_from_template(self, template: str, **kwargs):
         prompt = template.format(**kwargs)
         res = self.llm_client.get_response(prompt)
-        return json.loads(res)
+        return json.loads(res)["output"]
     
     def resolve_company_products(self, company_url: str):
         """
         Resolves the products of a given company using the LLM client.
         """
-        products_desc_list = json.loads(self.resolve_from_template(COMPANY_PRODUCTS_PROMPT, company_url=company_url))
-        return [Product(uuid.uuid4(), name=product["product_name"], url=product["product_url"]) for product in products_desc_list]
+        products_desc_list = self.resolve_from_template(COMPANY_PRODUCTS_PROMPT, company_url=company_url)
+        logger.warning(products_desc_list)
+        # return [Product(uuid.uuid4(), name=product["product_name"], url=product["product_url"]) for product in products_desc_list]
 
     def resolve_product_features(self, product_name: str, product_url: str):
         """
@@ -86,7 +87,7 @@ class Resolver():
             logger.debug(f"Resolving company products for URL: {company_url}")
             products = self.resolve_company_products(company_url)
 
-        for product in products:
-            logger.debug(f"Resolving features for product: {product}")
-            product.features = self.resolve_product_features(product.name, product.url)
-            self.send_to_vectorizer(product, props)
+        # for product in products:
+        #     logger.debug(f"Resolving features for product: {product}")
+        #     product.features = self.resolve_product_features(product.name, product.url)
+        #     self.send_to_vectorizer(product, props)

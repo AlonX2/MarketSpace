@@ -6,20 +6,17 @@ from ..interface import ILLMClient
 
 logger = logging.getLogger(__package__)
 
-OPENAI_API_KEY = "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"
-
-
 class GPTClient(ILLMClient):
     """GPT client, implementation of the ILLMClient interface.
     """
-    def __init__(self) -> None:
+    def __init__(self, api_key: str) -> None:
         try:
-            self._client = OpenAI(api_key=OPENAI_API_KEY)
+            self._client = OpenAI(api_key=api_key)
         except:
             logger.error("Could not instansiate new OpenAI client, check OPENAI_API_KEY")
             raise
     
-    def get_response(self, prompt):
+    def get_response(self, prompt) -> str:
         """Gets the response from the GPT instance for the prompt given to it.
 
         :param prompt: Prompt for the GPT instance.
@@ -34,8 +31,7 @@ class GPTClient(ILLMClient):
                         {"role": "user", "content": prompt}
                     ]
                 ).choices[0].message.content
-            
-            return json.loads(res)["message"]
+            return res
         except:
             logger.error("Could not get response from GPT client.")
             raise
