@@ -7,8 +7,6 @@ from src.app.microservice_client import MicroserviceClient, MicroserviceClientEx
 
 logger = logging.getLogger(__package__)
 
-feature_resolver_queue = get_env_vars(["FEATURE_RESOLVER_QUEUE"], 
-                                      required=True)
 class GetSimilarProductsException(Exception):
     """Generic exception for the get_similar_products handler
     """
@@ -31,6 +29,8 @@ def get_similar_products(product_desc_json: str | bytes) -> dict[str, list[str]]
         logger.error("Couldn\'t access microservice_client and/or vdb_index from CUSTOM config of app")
         raise
     
+    feature_resolver_queue, = get_env_vars(["FEATURE_RESOLVER_QUEUE"], 
+                                        required=True)
     try:        
         product_embeddings_json: str = microservice_client.invoke(target_queue=feature_resolver_queue, data_json=product_desc_json)
     except MicroserviceClientException as e:

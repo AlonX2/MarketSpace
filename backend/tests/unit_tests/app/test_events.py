@@ -1,5 +1,5 @@
 import sys, pytest, json
-sys.path.extend([".", "../."])
+sys.path.extend([".", "../.", "../../../../.", "../../../."])
 
 from flask import Flask
 from flask_socketio.test_client import SocketIOTestClient

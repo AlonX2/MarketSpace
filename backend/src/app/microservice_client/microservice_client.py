@@ -15,7 +15,7 @@ class MicroserviceClient():
             cls.instance = super(MicroserviceClient, cls).__new__(cls)
         return cls.instance
     
-    def __init__(self, rabbit_client: RabbitChannel) -> None:
+    def __init__(self, rabbit_channel: RabbitChannel) -> None:
         """Initializes the `MicroserviceClient` class.
 
         Initializes the connection and the callback queue of the client.
@@ -23,9 +23,9 @@ class MicroserviceClient():
         :raises MicroserviceClientFailedRabbitConnection: Raised in case of failure to connect to RabbitMQ server.
         """
         self._call_record: dict[uuid.UUID, CallFuture] = {}
-        self._rabbit_client = rabbit_client
-        self._res_queue = rabbit_client.create_exclusive_queue(message_callback=self._on_res)
-        rabbit_client.async_consume(self._res_queue, self._on_res)
+        self._rabbit_client = rabbit_channel
+        self._res_queue = rabbit_channel.create_exclusive_queue(message_callback=self._on_res)
+        rabbit_channel.async_consume(self._res_queue, self._on_res)
         logger.info("Instance created")
 
     def _on_res(self, ch, method, props, body) -> None:
