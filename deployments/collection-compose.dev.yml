@@ -14,7 +14,7 @@ services:
     logging:
       driver: none
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
+      test: rabbitmq-diagnostics -q check_running
       interval: 1m
       timeout: 5s
       retries: 5

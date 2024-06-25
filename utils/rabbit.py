@@ -92,5 +92,7 @@ class RabbitChannel():
         self.close()
 
     def __del__(self):
+        if not hasattr(self, "_connection"):
+            return
         if not self._connection.is_closed:
             self.close()
