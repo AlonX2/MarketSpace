@@ -3,7 +3,8 @@ import logging
 from src.app import create_app, socketio
 
 logger = logging.getLogger(__package__)
-logger.warning("SHITssssssssssssssssssssssssssssssssssssssssssssssssssss")
+logger.info("Starting flask server")
 app = create_app()
 
-socketio.run(app)
+socketio.init_app(app)
+logger.info("Started flask server")

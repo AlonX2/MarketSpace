@@ -9,6 +9,6 @@ RUN pip install -r /requirements.txt
 COPY ashit/src/ src/
 COPY utils/ utils/
 
-ENV PYTHONPATH "${PYTHONPATH}:/backend"
+ENV PYTHONPATH "${PYTHONPATH}:/ashit"
 
 ENTRYPOINT [ "gunicorn", "-c", "src/gunicorn_config.py", "src.run:app" ]
