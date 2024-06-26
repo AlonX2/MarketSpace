@@ -5,7 +5,7 @@ FEATURES_PROMPTS = {
 
 COMPANY_PRODUCTS_PROMPT = """list all products by \"{company_url}\"
 output ONLY actual distinct products by the company, do not list aspects of a single product! if company has only one product, list it and it alone
-output in a single list of jsons in the following manner only!:
+output in a single JSON in the following manner only!:
 {{
     "output":
     [
