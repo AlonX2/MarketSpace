@@ -20,7 +20,7 @@ class CrunchbaseOrganization():
 
     name: str
     uuid: int
-    url: str
+    website_url: str
 
     @classmethod
     def get_required_fields(cls) -> list[str]:
