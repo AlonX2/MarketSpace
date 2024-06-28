@@ -56,8 +56,7 @@ def main():
     
     logging.info("Starting to listen for messages!")
     rabbit_client = RabbitChannel.get_default_channel()
-    with open("nigger2.txt", "w") as f:
-        f.write("fuck")
+    
     backend_resolver = Resolver(from_backend=True,
                                 rabbit_client=rabbit_client,
                                 output_exchange=output_exchange,

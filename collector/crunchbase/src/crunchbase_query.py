@@ -123,9 +123,12 @@ class CrunchbaseSearchQuery():
         except requests.exceptions.RequestException as e:
             raise CrunchbaseQueryError(f"Failed to perform query due to requests error.") from e
             
+        resp_data = resp.json()
+
         if resp.status_code != 200:
-            raise CrunchbaseQueryError(f"Failed to perform query, got status code {resp.status_code}")
+            raise CrunchbaseQueryError(f"Failed to perform query, got status code {resp.status_code}, content '{resp_data}'")
         
-        logger.debug(f"Performed request to crunchbase, got {repr(resp)}")
+
+        logger.debug(f"Performed request to crunchbase, got {resp_data}")
 
         return resp.json()
