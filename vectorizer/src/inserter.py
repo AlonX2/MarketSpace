@@ -18,6 +18,7 @@ class Inserter():
         """
         Inserts all the locally saved features to the vector database, with a namespace that is determined by their type.
         """
+        print("super mega gay fag")
         try:
             for namespace, vectors in self._features.items():
                 self._driver.insert(vectors, namespace)
@@ -29,16 +30,27 @@ class Inserter():
         self._features = {}
 
     def register_feature(self, feature: ProductFeature):
+        logger.debug(f"registring feature '{feature}' for insertion.")
+        print("here!")
         if feature.namespace not in self._features:
+            print("hrer!")
             self._features[feature.namespace] = []
+
+        print("faggg")
+        print(f"nig: {feature.vector}")
+
         self._features[feature.namespace].append(feature.vector)
 
+        print("mega fag")
         longest_feature_list = max(self._features.values(), key=len)
         if len(longest_feature_list) > self._driver.RECOMMENDED_BATCH_SIZE:
+            print("superfag")
             self.insert_features()
 
     def __enter__(self):
         return self
 
-    def __exit__(self, **kwargs):
+    def __exit__(self, exc_type ,*_):
+        if exc_type is not None:
+            return
         self.insert_features()
