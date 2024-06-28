@@ -59,14 +59,14 @@ class Resolver():
     def resolve_from_template(self, template: str, **kwargs):
         prompt = template.format(**kwargs)
         res = self.llm_client.get_response(prompt)
-        return json.loads(res)
+        return json.loads(res)["output"]
 
     def resolve_company_products(self, company_url: str):
         """
         Resolves the products of a given company using the LLM client.
         """
         products_desc_list = self.resolve_from_template(
-            COMPANY_PRODUCTS_PROMPT, company_url=company_url)["output"]
+            COMPANY_PRODUCTS_PROMPT, company_url=company_url)
         logger.warning(products_desc_list)
         return [Product(str(uuid.uuid4()), name=product["product_name"], url=product["product_url"]) for product in products_desc_list]
 
