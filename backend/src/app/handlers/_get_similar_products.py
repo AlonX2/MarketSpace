@@ -8,7 +8,7 @@ from src.app.microservice_client import MicroserviceClient, MicroserviceClientEx
 
 logger = logging.getLogger(__package__)
 
-feature_resolver_queue = get_env_vars(["FEATURE_RESOLVER_QUEUE"], 
+feature_resolver_routing_key, = get_env_vars(["FEATURE_RESOLVER_ROUTING_KEY"], 
                                       required=True)
 class GetSimilarProductsException(Exception):
     """Generic exception for the get_similar_products handler
