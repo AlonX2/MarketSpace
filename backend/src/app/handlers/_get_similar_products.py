@@ -1,5 +1,6 @@
-import json, logging, pinecone
+import json, logging, uuid
 
+import pinecone
 from flask import current_app
 
 from utils.env import get_env_vars
@@ -14,7 +15,7 @@ class GetSimilarProductsException(Exception):
     """
     pass
 
-def get_similar_products(product_desc_json: str | bytes) -> dict[str, list[str]]:
+def get_similar_products(product_desc: dict) -> dict[str, list[str]]:
     """Retrieve similar products based on the given product description JSON.
     Uses `MicroserviceClient` with the configured microservices queues, and the vector db client
     in order to retreive the similar products already in the vector DB.
@@ -31,8 +32,9 @@ def get_similar_products(product_desc_json: str | bytes) -> dict[str, list[str]]
         logger.error("Couldn\'t access microservice_client and/or vdb_index from CUSTOM config of app")
         raise
     
-    try:        
-        product_embeddings_json: str = microservice_client.invoke(target_queue=feature_resolver_queue, data_json=product_desc_json)
+    product_desc["uid"] = str(uuid.uuid4())
+    try:
+        product_embeddings_json: str = microservice_client.invoke(routing_key=feature_resolver_routing_key, data_json=json.dumps(product_desc))
     except MicroserviceClientException as e:
         logger.error("Feature resolvance and embedding failed")
         raise GetSimilarProductsException("Feature resolvance and embedding failed") from e
