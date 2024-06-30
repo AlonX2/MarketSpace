@@ -59,19 +59,21 @@ class RabbitChannel():
     def create_exclusive_queue(self):
         return self._channel.queue_declare(queue="", exclusive=True).method.queue
 
-    def consume(self, queue):
+    def consume(self, queue, do_declare=True):
         if self._connection.is_closed:
             raise RabbitChannelException("Connection to Rabbit is closed, cannot consume")
-        self._channel.queue_declare(queue=queue)
+        if do_declare:
+            self._channel.queue_declare(queue=queue)
         get_ok, props, msg = self._channel.basic_get(queue=queue, auto_ack=True)
         if get_ok is None:
             raise NoMessagesFoundException("No messages in queue")
         return props, msg
         
-    def async_consume(self, queue, callback) -> None | str:
+    def async_consume(self, queue, callback, do_declare=True) -> None | str:
         if self._connection.is_closed:
             raise RabbitChannelException("Connection to Rabbit is closed, cannot async consume")
-        self._channel.queue_declare(queue=queue)
+        if do_declare:
+            self._channel.queue_declare(queue=queue)
         self._channel.basic_consume(queue=queue,
                                 on_message_callback=callback,
                                 auto_ack=True)
