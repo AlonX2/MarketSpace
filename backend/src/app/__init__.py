@@ -1,33 +1,25 @@
-from flask import Flask 
+from flask import Flask
 
+from utils.logging import setup_logger
 from src.app.custom_config import CustomConfig
 from src.app.events import socketio
+
+def _setup_logger():
+    """
+    Setups logging for the vectorspace_driver package.
+    """
+
+    import logging
+    logger = logging.getLogger(__package__)
+    logger.name = "backend"
+    setup_logger(logger)
+
+_setup_logger()
 
 def create_app():
     app = Flask(__name__)
     app.config["DEBUG"] = True
-
     app.config["CUSTOM"] = CustomConfig()
-    socketio.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
 
     return app
-
-def _setup_logger():
-    """
-    Setups logging for the backend.
-    """
-    
-    import logging
-    logger = logging.getLogger(__package__)
-    logger.setLevel(logging.DEBUG)
-
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('[%(asctime)s - %(name)s - %(levelname)s]:  %(message)s')
-
-    ch.setFormatter(formatter)
-
-    logger.addHandler(ch)
-
-_setup_logger()
