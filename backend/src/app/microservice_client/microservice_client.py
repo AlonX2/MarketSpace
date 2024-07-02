@@ -1,6 +1,5 @@
 import uuid, logging, threading
 
-import eventlet
 from utils.rabbit import RabbitChannel
 from utils.call_future import CallFuture
 from utils.env import get_env_vars
@@ -35,6 +34,7 @@ class MicroserviceClient():
     def _start_consume_channel(self):
         self._consume_channel.async_consume(self._res_queue, self._on_res, do_declare=False)
         self._consume_channel.start_consuming()
+        logger.info("Started consuming in micorservice client")
         # FLAG MAYBE
 
     def _on_res(self, ch, method, props, body) -> None:

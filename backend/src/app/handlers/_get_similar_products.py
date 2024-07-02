@@ -41,7 +41,6 @@ def get_similar_products(product_desc: dict) -> dict[str, list[str]]:
     
     product_embeddings: dict[str, list] = json.loads(product_embeddings_json)
     logger.info("Got product embeddings from FeatureResolver/Embedder")
-    logger.error(product_embeddings)
     similar_products: dict[str, list[str]] = dict()
     for feature_name, embedding in product_embeddings.items():
         similar_products[feature_name] = vdb_index.query(vector=embedding["values"], namespace=feature_name, top_k=5, include_metadata=True).to_dict()

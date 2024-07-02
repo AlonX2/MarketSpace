@@ -3,7 +3,6 @@ from pinecone.grpc import PineconeGRPC as Pinecone
 from utils.env import get_env_vars
 from src.app.microservice_client import MicroserviceClient
 
-from unittest.mock import MagicMock
 class CustomConfig():
     def __init__(self) -> None:
         pinecone_apikey, pc_index_name = get_env_vars(["PINECONE_API_KEY", "PINECONE_INDEX_NAME"], required=True)

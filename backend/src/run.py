@@ -1,5 +1,3 @@
-from src.app import create_app, socketio
+from src.app import create_app
 
 app = create_app()
-
-socketio.init_app(app)
