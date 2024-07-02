@@ -15,9 +15,9 @@ def insert_product_to_vdb(product: Product):
     metadata = {"name": product.name, "uid": product.uid}
     driver = OpenaiPineconeDriver()
 
-    with Inserter() as inserter:
+    with Inserter(driver) as inserter:
         for vectorspace, text in product.features.items():
-            inserter.register_feature(ProductFeature(text=text, vectorspace=vectorspace, metadata=metadata, driver=driver))
+            inserter.register_feature(ProductFeature(text=text, namespace=vectorspace, metadata=metadata, driver=driver))
 
 def send_features_to_rabbit(rabbit_client: RabbitChannel, product: Product):
     logger.debug("Starting to send product features back to backend.")
@@ -29,7 +29,7 @@ def send_features_to_rabbit(rabbit_client: RabbitChannel, product: Product):
     driver = OpenaiPineconeDriver()
 
     for vectorspace, text in product.features.items():
-        feature = ProductFeature(text=text, vectorspace=vectorspace, metadata=metadata, driver=driver).vector
+        feature = ProductFeature(text=text, namespace=vectorspace, metadata=metadata, driver=driver).vector
         feature_json = json.dumps(feature)
         rabbit_client.publish(exchange, product.routing_info.target_queue, feature_json, correlation_id=product.routing_info.corr_id)
 

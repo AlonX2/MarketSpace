@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
-      start_interval: 5s
+      start_interval: 1s
     networks:
         - rabbit_net
 

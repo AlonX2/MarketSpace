@@ -90,7 +90,7 @@ class RabbitChannel():
     def __enter__(self):
         return self
     
-    def __exit__(self, **_):
+    def __exit__(self, *_):
         self.close()
 
     def __del__(self):

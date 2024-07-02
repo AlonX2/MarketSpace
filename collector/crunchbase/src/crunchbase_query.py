@@ -92,12 +92,12 @@ class CrunchbaseSearchQuery():
         """
 
         if "order" in self._query:
-            raise CrunchbaseQueryError(f"Attempted to define query sorting when it already exists. Current query state: {self._query}")
+            raise CrunchbaseQueryError(f"Multiple sorting not currently supported. Current query state: {self._query}")
         
-        self._query["order"] = {
+        self._query["order"] = [{
                      "field_id": key_field,
                      "sort": "desc" if desc else "asc"
-                 }
+                 }]
         
         logger.debug(f"Added sorting by '{key_field}' to query. Current query state: '{self._query}'.")
 

@@ -19,9 +19,8 @@ class OpenaiPineconeDriver(IVectorspaceDriver):
         try:
             self.openai_client = OpenAI(api_key=openai_key)
             self.pinecone_index = Pinecone(api_key=pinecone_key).Index(pinecone_index)
-        except Exception:
-            logger.error("Failed to initialize openai and pinecone clients, possibly because of bad API keys.")
-            raise
+        except Exception as e:
+            raise DriverError("Failed to initialize openai and pinecone clients, possibly because of bad API keys.") from e
 
     def _get_embedding(self, text: str, model: str ="text-embedding-3-small") -> np.ndarray:
         """
@@ -49,7 +48,7 @@ class OpenaiPineconeDriver(IVectorspaceDriver):
         try:
             self.pinecone_index.upsert(vectors=vectors, namespace=vectorspace)
         except Exception as e:
-            raise DriverError(f"Failed to upsert vectors: {vectors} into namespace {vectorspace}") from e
+            raise DriverError(f"Failed to upsert vectors: {vectors} into namespace '{vectorspace}'") from e
         
         logger.debug(f"Inserted {len(vectors)} vectors into namespace '{vectorspace}'!")
 

@@ -18,7 +18,9 @@ def main():
     
     gpt_client = GPTClient(api_key=openai_api_key)
     logging.info("Starting to listen for messages!")
+    
     rabbit_channel = RabbitChannel.get_default_channel()
+
     backend_resolver = Resolver(from_backend=True,
                                 rabbit_channel=rabbit_channel,
                                 llm_client=gpt_client,
