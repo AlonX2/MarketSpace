@@ -35,6 +35,7 @@ def handle_get_similar_products(product_desc: dict):
         logger.error(f"Parameter product_desc_json isn\'t valid: {str(e)}")
         return
     try:
+        logger.error("BITCHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
         products_json = get_similar_products(product_desc)
         emit("similar_products_response", products_json)
         logger.info("Finished processing similar_products_request")
