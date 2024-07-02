@@ -1,4 +1,4 @@
-name: marketspace-backend
+name: marketspace
 
 services:
   rabbitmq:
@@ -73,7 +73,6 @@ services:
     build:
       context: ..
       dockerfile: backend/Dockerfile
-    image: backend
     container_name: backend
     env_file:
       - ./env/backend.env

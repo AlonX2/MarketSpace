@@ -1,5 +1,6 @@
-import pydantic, logging
+import logging
 
+import pydantic
 from flask import request
 from flask_socketio import emit
 
@@ -17,7 +18,7 @@ def handle_connect():
     logger.info(f"User connected with session id: {request.sid}")
 
 @socketio.on("similar_products_request")
-def handle_get_similar_products(product_desc_json: str | bytes):
+def handle_get_similar_products(product_desc: dict):
     """Handle a request for similar products.
 
     Validates the product description JSON, emits an error message if validation fails, 
@@ -26,17 +27,17 @@ def handle_get_similar_products(product_desc_json: str | bytes):
 
     :param product_desc_json: JSON string or bytes containing the product description.
     """
-    logger.debug("similar_products_request event called")
+    logger.info("similar_products_request event called")
     try:
-        ProductDescription.model_validate_json(product_desc_json)
+        ProductDescription.model_validate(product_desc)
     except pydantic.ValidationError as e:
         emit("similar_products_error", str(e))
         logger.error(f"Parameter product_desc_json isn\'t valid: {str(e)}")
         return
     try:
-        products_json = get_similar_products(product_desc_json)
+        products_json = get_similar_products(product_desc)
         emit("similar_products_response", products_json)
-        logger.debug("Finished processing similar_products_request")
+        logger.info("Finished processing similar_products_request")
     except GetSimilarProductsException as e:
         emit("similar_products_error", str(e))
-        logger.error(f"Could\'nt get similar products")
+        logger.info(f"Could\'nt get similar products")

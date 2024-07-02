@@ -9,10 +9,8 @@ logger = logging.getLogger(__package__)
 
 
 class Resolver():
+    """A class that resolves company/products for full product description
     """
-    A class that resolves the features of the products given to it
-    """
-
     def __init__(self, from_backend, rabbit_channel: RabbitChannel, llm_client: ILLMClient, output_exchange, output_routing_key) -> None:
         self.from_backend = from_backend
         self.rabbit_channel = rabbit_channel

@@ -16,11 +16,11 @@ export default function useWs(eventName, data, resEvent, errEvent){
             setLoading(false);
         });
         socket.emit(eventName, data);
-        return  () => {
+        return () => {
             socket.off(resEvent);
             socket.off(errEvent);
         }
-    },[data, eventName]);
+    }, [data, eventName]);
     
     return {res, err, loading};
 }
