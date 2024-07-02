@@ -22,7 +22,7 @@ def get_orgs_by_categories(categories: list[str], start_date: str = None, end_da
     query_url = f"{CRUNCHBASE_API_ENDPOINT}/searches/organizations"
     query = CrunchbaseSearchQuery(query_url, requested_fields=CrunchbaseOrganization.get_required_fields())
 
-    query.add_filter("categories", "Includes", categories)
+    query.add_filter("short_description", "contains", categories)
     query.define_sorting("rank_org")
 
     if start_date is not None:
@@ -47,7 +47,7 @@ def collect():
 
     with RabbitChannel.get_default_channel() as rabbit_channel:
         for org_info in orgs:
-            org = CrunchbaseOrganization.create_from_org_fields(org_info)
+            org = CrunchbaseOrganization.create_from_org_fields(org_info["properties"])
             logger.info(f"Sending org {repr(org)} to rabbit.")
             rabbit_channel.publish(rabbit_exchange, rabbit_rk, org.json)
 

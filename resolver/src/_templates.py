@@ -1,15 +1,14 @@
 FEATURES_PROMPTS = {
-    "problem": """Given the product description in this url {product_url}, Describe the problem the product "{product_name}" addresses.
+    "problem": """Given the product description in this url {product_url}, Describe the problem the product \"{product_name}\" addresses,
 output in a single JSON in the following manner only!:
 {{
-    "output": <problem description>
+    "output": <in-depth problem description>
 }}""",
-    "market": """Given the product description in this url {product_url}, Describe the market of the product "{product_name}".
+    "market": """Given the product description in this url {product_url}, Describe the market of the product \"{product_name}\",
 output in a single JSON in the following manner only!:
 {{
-    "output": <market description>
-}}
-"""
+    "output": <in-depth market description>
+}}"""
 }
 
 COMPANY_PRODUCTS_PROMPT = """list all products by "{company_url}"

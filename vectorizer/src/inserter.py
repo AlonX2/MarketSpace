@@ -29,8 +29,10 @@ class Inserter():
         self._features = {}
 
     def register_feature(self, feature: ProductFeature):
+        logger.debug(f"registring feature '{feature}' for insertion.")
         if feature.namespace not in self._features:
             self._features[feature.namespace] = []
+
         self._features[feature.namespace].append(feature.vector)
 
         longest_feature_list = max(self._features.values(), key=len)
@@ -40,5 +42,7 @@ class Inserter():
     def __enter__(self):
         return self
 
-    def __exit__(self, **kwargs):
+    def __exit__(self, exc_type ,*_):
+        if exc_type is not None:
+            return
         self.insert_features()

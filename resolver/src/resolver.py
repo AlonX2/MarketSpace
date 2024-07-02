@@ -54,9 +54,6 @@ class Resolver():
                                     reply_to=props.reply_to)
         logger.info(f"Product sent to vectorizer: {product_json}")
 
-    def load_templates_from_file(self):
-        pass
-
     def resolve_from_template(self, template: str, **kwargs):
         prompt = template.format(**kwargs)
         res = self.llm_client.get_response(prompt)
@@ -89,7 +86,7 @@ class Resolver():
         if self.from_backend:
             products = [self.build_product_from_msg(props, msg)]
         else:
-            company_url = json.loads(msg)["url"]
+            company_url = json.loads(msg)["website_url"]
             logger.debug(f"Resolving company products for URL: {company_url}")
             products = self.resolve_company_products(company_url)
 
