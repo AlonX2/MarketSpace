@@ -25,8 +25,8 @@ class MicroserviceClient():
         :raises MicroserviceClientFailedRabbitConnection: Raised in case of failure to connect to RabbitMQ server.
         """
         self._call_record: dict[uuid.UUID, CallFuture] = {}
-        self._publish_channel = RabbitChannel.get_default_channel()
-        self._consume_channel = RabbitChannel.get_default_channel()
+        self._consume_channel = RabbitChannel.get_default_channel(
+            client_properties={"connection_name": "connection-microservice-client-consume"})
         self._res_queue = self._consume_channel.create_exclusive_queue()
         threading.Thread(target=self._start_consume_channel).start()
         logger.info("Instance created")
@@ -74,14 +74,16 @@ class MicroserviceClient():
         _call_future = CallFuture()
         self._call_record[corr_id] = _call_future
         
-        self._publish_channel.publish(
-            exchange=rabbit_exchange,
-            routing_key=routing_key,
-            content=data_json,
-            reply_to=self._res_queue,
-            correlation_id=corr_id)
-        
-        _call_future.happened.wait()
+        with RabbitChannel.get_default_channel(
+            client_properties={"connection_name": "tmp-connection-microservice-client-publish"}) as publish_channel:
+            publish_channel.publish(
+                exchange=rabbit_exchange,
+                routing_key=routing_key,
+                content=data_json,
+                reply_to=self._res_queue,
+                correlation_id=corr_id)
+            
+            _call_future.happened.wait()
         if _call_future.error is not None:
             logger.error(str(_call_future.error))
             raise _call_future.error
