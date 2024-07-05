@@ -11,7 +11,7 @@ function App() {
       <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-tr from-white via-blue-200 to-white ">
         <Routes>
           <Route path="/" element={<ProductForm />} />
-          <Route path="/product-dashboard/:name/:url" element={<ProductDashboardWrapper />} />
+          <Route path="/product-dashboard" element={<ProductDashboardWrapper />} />
         </Routes>
       </div>
     </BrowserRouter>

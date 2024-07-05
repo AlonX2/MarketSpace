@@ -15,7 +15,7 @@ export default function ProductForm(){
 
   function handleFormSubmit(event){
     event.preventDefault();
-    navigateTo(`/product-dashboard/${encodeURIComponent(name)}/${encodeURIComponent(url)}`);
+    navigateTo(`/product-dashboard?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`);
   }
   return (
       <form onSubmit={handleFormSubmit} className="flex flex-col w-64">
