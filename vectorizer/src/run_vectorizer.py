@@ -22,16 +22,19 @@ def insert_product_to_vdb(product: Product):
 def send_features_to_rabbit(rabbit_client: RabbitChannel, product: Product):
     logger.debug("Starting to send product features back to backend.")
 
-    exchange = get_env_vars(["RABBIT_OUTPUT_EXCHANGE"],
+    exchange, = get_env_vars(["RABBIT_OUTPUT_EXCHANGE"],
                             required=True)
     
     metadata = {"name": product.name, "uid": product.uid}
     driver = OpenaiPineconeDriver()
 
+    features_vectors = dict()
     for vectorspace, text in product.features.items():
         feature = ProductFeature(text=text, namespace=vectorspace, metadata=metadata, driver=driver).vector
-        feature_json = json.dumps(feature)
-        rabbit_client.publish(exchange, product.routing_info.target_queue, feature_json, correlation_id=product.routing_info.corr_id)
+        feature["values"] = feature["values"].tolist()
+        features_vectors[vectorspace] = feature
+    features_vectors_json = json.dumps(features_vectors)
+    rabbit_client.publish("", product.routing_info.target_queue, features_vectors_json, correlation_id=product.routing_info.corr_id)
 
 def main():
     rabbit_input_queue, = get_env_vars(["RABBIT_INPUT_QUEUE"], required=True)

@@ -74,6 +74,8 @@ services:
       context: ..
       dockerfile: backend/Dockerfile
     container_name: backend
+    ports:
+      - "8888:8888"
     env_file:
       - ./env/backend.env
       - ./env/api_keys.env
