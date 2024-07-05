@@ -1,15 +1,14 @@
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import ProductDashboard from "./ProductDashboard";
-import useWs from "./useWs";
+import useFetch from "./useFetch";
 
 export default function ProductDashboardWrapper(){
     const { name, url } = useParams();
-    const { data, error, loading } = useWs(
-        "similar_products_request",
-        {"name": name, "url": url},
-        "similar_products_response",
-        "similar_products_error"
+    const { data, error, loading } = useFetch("http://127.0.0.1/products?" + new URLSearchParams({
+            "name": name,
+            "url": url,
+        })
     );
     if (loading){
         return <div>LOADING...</div>

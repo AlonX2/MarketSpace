@@ -1,4 +1,4 @@
-import uuid, logging
+import uuid, logging, threading
 
 from utils.rabbit import RabbitChannel
 from utils.call_future import CallFuture
@@ -12,12 +12,12 @@ rabbit_exchange, = get_env_vars(["RABBIT_EXCHANGE"], required=True)
 class MicroserviceClient():
     """A singleton for making RPC call to the different microservices the backend is a client of
     """
-    def __new__(cls, rabbit_channel: RabbitChannel):
+    def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(MicroserviceClient, cls).__new__(cls)
         return cls.instance
     
-    def __init__(self, rabbit_channel: RabbitChannel) -> None:
+    def __init__(self) -> None:
         """Initializes the `MicroserviceClient` class.
 
         Initializes the connection and the callback queue of the client.
@@ -25,10 +25,17 @@ class MicroserviceClient():
         :raises MicroserviceClientFailedRabbitConnection: Raised in case of failure to connect to RabbitMQ server.
         """
         self._call_record: dict[uuid.UUID, CallFuture] = {}
-        self._rabbit_channel = rabbit_channel
-        self._res_queue = rabbit_channel.create_exclusive_queue()
-        rabbit_channel.async_consume(self._res_queue, self._on_res, do_declare=False)
+        self._consume_channel = RabbitChannel.get_default_channel(
+            client_properties={"connection_name": "connection-microservice-client-consume"})
+        self._res_queue = self._consume_channel.create_exclusive_queue()
+        threading.Thread(target=self._start_consume_channel).start()
         logger.info("Instance created")
+        
+    def _start_consume_channel(self):
+        self._consume_channel.async_consume(self._res_queue, self._on_res, do_declare=False)
+        self._consume_channel.start_consuming()
+        logger.info("Started consuming in micorservice client")
+        # FLAG MAYBE
 
     def _on_res(self, ch, method, props, body) -> None:
         """The callback function that handles responses from the different microservices, 
@@ -43,7 +50,7 @@ class MicroserviceClient():
         if props.correlation_id in self._call_record:
             call_future = self._call_record[props.correlation_id]
 
-            if "error" in props.headers and props.headers["error"] == "true":
+            if props.headers is not None and "error" in props.headers and props.headers["error"] == "true":
                 call_future.set_error(MicroserviceFailed(body))
                 del self._call_record[props.correlation_id]
                 return
@@ -67,14 +74,16 @@ class MicroserviceClient():
         _call_future = CallFuture()
         self._call_record[corr_id] = _call_future
         
-        self._rabbit_channel.publish(
-            exchange=rabbit_exchange,
-            routing_key=routing_key,
-            content=data_json,
-            reply_to=self._res_queue,
-            correlation_id=corr_id)
-        
-        _call_future.happened.wait()
+        with RabbitChannel.get_default_channel(
+            client_properties={"connection_name": "tmp-connection-microservice-client-publish"}) as publish_channel:
+            publish_channel.publish(
+                exchange=rabbit_exchange,
+                routing_key=routing_key,
+                content=data_json,
+                reply_to=self._res_queue,
+                correlation_id=corr_id)
+            
+            _call_future.happened.wait()
         if _call_future.error is not None:
             logger.error(str(_call_future.error))
             raise _call_future.error
