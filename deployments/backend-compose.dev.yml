@@ -63,8 +63,6 @@ services:
     container_name: backend
     ports:
       - "80:80"
-    volumes:
-      - ../frontend/dist/:/etc/nginx/html/:ro
     depends_on:
       - api
     restart: always

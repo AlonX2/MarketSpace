@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:20-bookworm AS build
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY frontend/ .
 
 RUN yarn build
 
-FROM nginx:stable-alpine
+FROM nginx:stable-bookworm
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY backend/nginx.conf /etc/nginx/conf.d/default.conf
