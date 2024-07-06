@@ -8,7 +8,7 @@ services:
         - 5672:5672
         - 15672:15672
     volumes:
-        - /Users/alonat/Developer/MarketSpace/logs:/var/lib/rabbitmq
+        - rabbitmq_logs:/var/lib/rabbitmq
         - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
         - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     logging:
@@ -42,7 +42,7 @@ services:
       mode: replicated
       replicas: 6
     volumes:
-        - /Users/alonat/Developer/MarketSpace/logs:/tmp/logs
+        - ../logs:/tmp/logs
 
 
   resolver:
@@ -80,7 +80,7 @@ services:
     networks:
         - rabbit_net
     volumes:
-        - /Users/alonat/Developer/MarketSpace/logs:/tmp/logs
+        - ../logs:/tmp/logs
 
 volumes:
   rabbitmq_logs:
