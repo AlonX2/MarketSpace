@@ -27,12 +27,10 @@ services:
     build:
       context: ..
       dockerfile: vectorizer/Dockerfile
-    container_name: vectorizer
     env_file:
         - ./env/vectorizer.env
         - ./env/api_keys.env
         - ./env/rabbit_creds.env
-
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -40,6 +38,11 @@ services:
         - rabbit_net
     logging:
       driver: local
+    deploy:
+      mode: replicated
+      replicas: 3
+    volumes:
+        - ../logs:/tmp/logs
 
   resolver:
     build:
@@ -55,6 +58,11 @@ services:
         condition: service_healthy
     networks:
         - rabbit_net
+    deploy:
+      mode: replicated
+      replicas: 3
+    volumes:
+        - ../logs:/tmp/logs
 
   backend:
     build:
