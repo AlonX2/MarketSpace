@@ -27,7 +27,7 @@ class CrunchbaseSearchQuery():
 
         logger.debug(f"Initialized crunchbase query object with url '{url}' with requested fields '{requested_fields}'.")
 
-    def execute(self) -> list[dict]:
+    def execute(self, results_limit) -> list[dict]:
         """
         Execute the query with pagination until theres no more results.
         :returns: List of all returned entities.
@@ -38,7 +38,7 @@ class CrunchbaseSearchQuery():
         self._ensure_query_integrity()
 
         executing_query = self._query.copy()
-        executing_query["limit"] = PAGINATION_BATCH_SIZE
+        executing_query["limit"] = min(PAGINATION_BATCH_SIZE, results_limit)
 
         logger.info("Starting to execute query")
         logger.debug(f"Executing query state: {executing_query}")
@@ -55,7 +55,11 @@ class CrunchbaseSearchQuery():
 
             entities.extend(content["entities"])
             if len(content["entities"]) < PAGINATION_BATCH_SIZE:
-                logger.info(f"Finished exectuting query, got {len(entities)} results.")
+                logger.info(f"Finished exectuting query (no more results), got {len(entities)} results.")
+                break
+            
+            if len(entities) >= results_limit:
+                logger.info(f"Finished executing query (reached limit), got {len(entities)} results.")
                 break
 
         return entities
