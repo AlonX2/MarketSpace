@@ -8,7 +8,7 @@ services:
         - 5672:5672
         - 15672:15672
     volumes:
-        - rabbitmq_logs:/var/lib/rabbitmq
+        - /Users/alonat/Developer/MarketSpace/logs:/var/lib/rabbitmq
         - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
         - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     logging:
@@ -27,12 +27,10 @@ services:
     build:
       context: ..
       dockerfile: vectorizer/Dockerfile
-    container_name: vectorizer
     env_file:
         - ./env/vectorizer.env
         - ./env/api_keys.env
         - ./env/rabbit_creds.env
-
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -40,12 +38,17 @@ services:
         - rabbit_net
     logging:
       driver: local
+    deploy:
+      mode: replicated
+      replicas: 6
+    volumes:
+        - /Users/alonat/Developer/MarketSpace/logs:/tmp/logs
+
 
   resolver:
     build:
       context: ..
       dockerfile: resolver/Dockerfile
-    container_name: resolver
     env_file:
         - ./env/resolver.env
         - ./env/api_keys.env
@@ -55,6 +58,11 @@ services:
         condition: service_healthy
     networks:
         - rabbit_net
+    deploy:
+      mode: replicated
+      replicas: 6
+    volumes:
+        - /Users/alonat/Developer/MarketSpace/logs:/tmp/logs
 
   collector:
     build:
@@ -62,7 +70,6 @@ services:
       dockerfile: collector/Dockerfile
       args:
           - type=crunchbase
-    container_name: collector
     env_file:
         - ./env/collector.env
         - ./env/api_keys.env
@@ -72,6 +79,8 @@ services:
         condition: service_healthy
     networks:
         - rabbit_net
+    volumes:
+        - /Users/alonat/Developer/MarketSpace/logs:/tmp/logs
 
 volumes:
   rabbitmq_logs:

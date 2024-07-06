@@ -6,17 +6,20 @@ def setup_logger(logger: logging.Logger):
     """
     logging.basicConfig()
     
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     logger.propagate = False
-
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
 
     formatter = logging.Formatter('[%(asctime)s - %(name)s - %(levelname)s]:  %(message)s', datefmt="%d/%m/%Y %I:%M:%S %p %Z")
 
-    ch.setFormatter(formatter)
+    sh = logging.StreamHandler()
+    sh.setLevel(logging.INFO)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
 
-    logger.addHandler(ch)
+    fh = logging.FileHandler(f'/tmp/logs/{logger.name}.log')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
 
 def format_logged_substring(string: str) -> str:
     """
