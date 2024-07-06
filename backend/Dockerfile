@@ -1,14 +1,20 @@
-FROM python:3.12-slim
+FROM node:20-alpine AS build
 
-WORKDIR /backend
+WORKDIR /app
 
-COPY backend/requirements.txt /requirements.txt
+COPY frontend/package.json frontend/yarn.lock ./
 
-RUN pip install -r /requirements.txt
+RUN yarn install
 
-COPY backend/src/ src/
-COPY utils/ utils/
+COPY frontend/ .
 
-ENV PYTHONPATH "${PYTHONPATH}:/backend"
+RUN yarn build
 
-ENTRYPOINT [ "gunicorn", "-c", "src/gunicorn_config.py", "src.run:app" ]
+FROM nginx:stable-alpine
+
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY backend/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
