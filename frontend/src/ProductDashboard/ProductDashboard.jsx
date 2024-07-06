@@ -1,6 +1,6 @@
 import NetworkChart from "./NetworkChart";
 
-export default function ProductDashboard({ data }){
+export default function ProductDashboard({ data }) {
     const { score, neighbors } = data;
     const neighborNum = neighbors.length;
 
