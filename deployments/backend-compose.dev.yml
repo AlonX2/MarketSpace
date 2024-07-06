@@ -42,13 +42,12 @@ services:
       mode: replicated
       replicas: 3
     volumes:
-        - ../logs:/tmp/logs
+        - ../logs:/var/logs
 
   resolver:
     build:
       context: ..
       dockerfile: resolver/Dockerfile
-    container_name: resolver
     env_file:
         - ./env/resolver.env
         - ./env/api_keys.env
@@ -62,7 +61,7 @@ services:
       mode: replicated
       replicas: 3
     volumes:
-        - ../logs:/tmp/logs
+        - ../logs:/var/logs
 
   backend:
     build:
@@ -94,6 +93,8 @@ services:
     networks:
       - webnet
       - rabbit_net
+    volumes:
+        - ../logs:/var/logs
 
 volumes:
   rabbitmq_logs:

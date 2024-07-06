@@ -42,7 +42,7 @@ services:
       mode: replicated
       replicas: 6
     volumes:
-        - ../logs:/tmp/logs
+        - ../logs:/var/logs
 
 
   resolver:
@@ -62,7 +62,7 @@ services:
       mode: replicated
       replicas: 6
     volumes:
-        - /Users/alonat/Developer/MarketSpace/logs:/tmp/logs
+        - ../logs:/var/logs
 
   collector:
     build:
@@ -80,7 +80,7 @@ services:
     networks:
         - rabbit_net
     volumes:
-        - ../logs:/tmp/logs
+        - ../logs:/var/logs
 
 volumes:
   rabbitmq_logs:

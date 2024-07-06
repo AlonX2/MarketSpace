@@ -16,7 +16,7 @@ def setup_logger(logger: logging.Logger):
     sh.setFormatter(formatter)
     logger.addHandler(sh)
 
-    fh = logging.FileHandler(f'/tmp/logs/{logger.name}.log')
+    fh = logging.FileHandler(f'/var/logs/{logger.name}.log')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
