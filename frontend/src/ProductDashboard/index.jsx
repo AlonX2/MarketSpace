@@ -20,10 +20,6 @@ export default function ProductDashboardWrapper() {
         return <div>ERROR</div>
     }
     if (res) {
-        const data = {
-            score: 55,
-            neighbors: ["shit", "ass", "nigga"]
-        }
-        return <ProductDashboard data={data}></ProductDashboard>
+        return <ProductDashboard data={res}></ProductDashboard>
     }
 }
