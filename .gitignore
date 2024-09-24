@@ -1,5 +1,5 @@
 .pycache
-.env
+api_keys.env
 __pycache__
 .vscode
 node_modules
