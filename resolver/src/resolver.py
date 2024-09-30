@@ -1,8 +1,11 @@
-import dataclasses, json, logging, uuid
+import dataclasses
+import json
+import logging
+import uuid
 
 from utils.product import Product, ProductRoutingInfo
 from utils.rabbit import RabbitChannel
-from src.clients.interface import ILLMClient
+from utils.llm_clients.interface import ILLMClient
 from src._templates import *
 
 logger = logging.getLogger(__package__)
@@ -11,6 +14,7 @@ logger = logging.getLogger(__package__)
 class Resolver():
     """A class that resolves company/products for full product description
     """
+
     def __init__(self, from_backend, rabbit_channel: RabbitChannel, llm_client: ILLMClient, output_exchange, output_routing_key) -> None:
         self.from_backend = from_backend
         self.rabbit_channel = rabbit_channel

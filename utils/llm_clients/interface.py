@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class ILLMClient(ABC):
     """An interface for a generic LLM client.
     """
